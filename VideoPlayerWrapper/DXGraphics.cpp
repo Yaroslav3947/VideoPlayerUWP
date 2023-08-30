@@ -25,6 +25,13 @@ DXGraphics::DXGraphics()
       m_height(1.0f),
       m_width(1.0f) {
 
+    this->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(this, &DXGraphics ::OnSizeChanged);
+  this->CompositionScaleChanged +=
+      ref new Windows::Foundation::TypedEventHandler<SwapChainPanel ^,
+                                                     Object ^>(this, &DXGraphics::OnCompositionScaleChanged);
+
+  critical_section::scoped_lock lock(m_criticalSection);
+
   CreateDeviceIndependentResources();
   CreateDeviceResources();
   CreateSizeDependentResources();
@@ -166,7 +173,7 @@ void DXGraphics::Render() {
 
   m_renderTarget->BeginDraw();
   m_renderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
-  m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+  m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Blue));
   m_renderTarget->EndDraw();
 
   Present();
@@ -204,10 +211,10 @@ void DXGraphics::StartRenderLoop() {
   auto self = this;
   auto workItemHandler = ref new WorkItemHandler([self](IAsyncAction ^ action) {
     while (action->Status == AsyncStatus::Started) {
-      // self->m_timer.Tick([&]() {
-      critical_section::scoped_lock lock(self->m_criticalSection);
-      self->Render();
-      //});
+      self->m_timer.Tick([&]() {
+        critical_section::scoped_lock lock(self->m_criticalSection);
+        self->Render();
+      });
 
       self->m_dxgiOutput->WaitForVBlank();
     }
@@ -239,4 +246,28 @@ void DXGraphics::OnDeviceLost() {
   CreateSizeDependentResources();
 
   Render();
+}
+
+void DXGraphics::OnSizeChanged(Object ^ sender, SizeChangedEventArgs ^ e) {
+  if (m_width != e->NewSize.Width || m_height != e->NewSize.Height) {
+    critical_section::scoped_lock lock(m_criticalSection);
+
+    m_width = max(e->NewSize.Width, 1.0f);
+    m_height = max(e->NewSize.Height, 1.0f);
+
+    CreateSizeDependentResources();
+  }
+}
+
+void DXGraphics::OnCompositionScaleChanged(SwapChainPanel ^ sender,
+                                                Object ^ args) {
+  if (m_compositionScaleX != CompositionScaleX ||
+      m_compositionScaleY != CompositionScaleY) {
+    critical_section::scoped_lock lock(m_criticalSection);
+
+    m_compositionScaleX = this->CompositionScaleX;
+    m_compositionScaleY = this->CompositionScaleY;
+
+    CreateSizeDependentResources();
+  }
 }

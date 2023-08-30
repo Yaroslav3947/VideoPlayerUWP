@@ -13,9 +13,7 @@ namespace VideoPlayerWrapper {
 
  private
  protected:
-  void RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap);
-  ComPtr<ID2D1Bitmap> CreateBitmapFromVideoSample(IMFSample pSample, const UINT32& width,
-                                                  const UINT32& height);
+
   void Present();
   void CreateDeviceIndependentResources();
   void CreateDeviceResources();
@@ -28,13 +26,10 @@ namespace VideoPlayerWrapper {
                                  Platform::Object ^ args);
 
   ComPtr<IDXGIOutput> m_dxgiOutput;
-
   ComPtr<ID3D11Device1> m_d3dDevice;
   ComPtr<ID3D11DeviceContext1> m_d3dContext;
   ComPtr<IDXGISwapChain2> m_swapChain;
-
   ComPtr<ID2D1RenderTarget> m_renderTarget;
-
   ComPtr<ID2D1Factory2> m_d2dFactory;
   ComPtr<ID2D1Device> m_d2dDevice;
 

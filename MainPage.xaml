@@ -3,12 +3,17 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:VideoPlayerUWP"
+    xmlns:graphics="using:VideoPlayerWrapper"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Width="1600" Height="900">
 
-    <Grid>
+    <Page.Content>
+        <Grid>
+            <graphics:DXGraphics x:Name="mySwapChainPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            </graphics:DXGraphics>
+        </Grid>
+    </Page.Content>
 
-    </Grid>
 </Page>
