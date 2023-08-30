@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using VideoPlayerWrapper;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -28,6 +31,11 @@ namespace VideoPlayerUWP {
             base.OnNavigatedTo(e);
 
             mySwapChainPanel.StartRenderLoop();
+
+            VideoPlayerWrp videoPlayer = new VideoPlayerWrp();
+
+            videoPlayer.OpenURL("SampleVideo25fps.mp4");
+
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e) {
