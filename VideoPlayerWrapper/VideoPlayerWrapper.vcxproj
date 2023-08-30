@@ -160,6 +160,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>mf.lib;dxgi.lib;d3d11.lib;d2d1.lib;dxguid.lib;mfplat.lib;mfuuid.lib;winmm.lib;Propsys.lib;mfreadwrite.lib;wmcodecdspuuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -271,6 +272,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="DXGraphics.h" />
     <ClInclude Include="StepTimer.h" />
+    <ClInclude Include="VideoPlayerWrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -284,6 +286,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="DXGraphics.cpp" />
+    <ClCompile Include="VideoPlayerWrapper.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

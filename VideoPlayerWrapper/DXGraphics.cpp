@@ -30,8 +30,6 @@ DXGraphics::DXGraphics()
       ref new Windows::Foundation::TypedEventHandler<SwapChainPanel ^,
                                                      Object ^>(this, &DXGraphics::OnCompositionScaleChanged);
 
-  critical_section::scoped_lock lock(m_criticalSection);
-
   CreateDeviceIndependentResources();
   CreateDeviceResources();
   CreateSizeDependentResources();
@@ -201,7 +199,6 @@ void DXGraphics::Present() {
 DXGraphics::~DXGraphics() { m_renderLoopWorker->Cancel(); }
 
 
-
 void DXGraphics::StartRenderLoop() {
   if (m_renderLoopWorker != nullptr &&
       m_renderLoopWorker->Status == AsyncStatus::Started) {
@@ -211,10 +208,10 @@ void DXGraphics::StartRenderLoop() {
   auto self = this;
   auto workItemHandler = ref new WorkItemHandler([self](IAsyncAction ^ action) {
     while (action->Status == AsyncStatus::Started) {
-      self->m_timer.Tick([&]() {
+      //self->m_timer.Tick([&]() {
         critical_section::scoped_lock lock(self->m_criticalSection);
         self->Render();
-      });
+      //});
 
       self->m_dxgiOutput->WaitForVBlank();
     }

@@ -9,10 +9,12 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="DXGraphics.cpp" />
+    <ClCompile Include="VideoPlayerWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="DXGraphics.h" />
     <ClInclude Include="StepTimer.h" />
+    <ClInclude Include="VideoPlayerWrapper.h" />
   </ItemGroup>
 </Project>
