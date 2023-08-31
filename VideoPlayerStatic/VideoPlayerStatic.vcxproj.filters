@@ -30,6 +30,9 @@
     <ClInclude Include="Include.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DXHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VideoPlayer.cpp">
@@ -42,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Audio\MediaReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DXHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -23,7 +23,8 @@ DXGraphics::DXGraphics()
     : m_compositionScaleX(1.0f),
       m_compositionScaleY(1.0f),
       m_height(1.0f),
-      m_width(1.0f) {
+      m_width(1.0f),
+      m_swapChain(nullptr) {
 
     this->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(this, &DXGraphics ::OnSizeChanged);
   this->CompositionScaleChanged +=
@@ -84,23 +85,23 @@ void DXGraphics::CreateSizeDependentResources() {
   m_renderTargetWidth = m_width * m_compositionScaleX;
   m_renderTargetHeight = m_height * m_compositionScaleY;
 
-  // If the swap chain already exists, then resize it.
-  if (m_swapChain != nullptr) {
-    if (m_renderTarget) {
-      m_renderTarget.Reset();
-    }
-    HRESULT hr = m_swapChain->ResizeBuffers(
-        2, static_cast<UINT>(m_renderTargetWidth),
-        static_cast<UINT>(m_renderTargetHeight), DXGI_FORMAT_B8G8R8A8_UNORM, 0);
+  // // If the swap chain already exists, then resize it.
+  //if (m_swapChain != nullptr) {
+  //  if (m_renderTarget) {
+  //    m_renderTarget.Reset();
+  //  }
+  //  HRESULT hr = m_swapChain->ResizeBuffers(
+  //      2, static_cast<UINT>(m_renderTargetWidth),
+  //      static_cast<UINT>(m_renderTargetHeight), DXGI_FORMAT_B8G8R8A8_UNORM, 0);
 
-    if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
-      OnDeviceLost();
-      return;
+  //  if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
+  //    OnDeviceLost();
+  //    return;
 
-    } else {
-      winrt::check_hresult(hr);
-    }
-  } else  // Otherwise, create a new one.
+  //  } else {
+  //    winrt::check_hresult(hr);
+  //  }
+  //} else  // Otherwise, create a new one.
   {
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {0};
     swapChainDesc.Width = static_cast<UINT>(m_renderTargetWidth);
@@ -178,15 +179,9 @@ void DXGraphics::Render() {
 }
 
 void DXGraphics::Present() {
-  DXGI_PRESENT_PARAMETERS parameters = {0};
-  parameters.DirtyRectsCount = 0;
-  parameters.pDirtyRects = nullptr;
-  parameters.pScrollRect = nullptr;
-  parameters.pScrollOffset = nullptr;
-
   HRESULT hr = S_OK;
 
-  hr = m_swapChain->Present1(1, 0, &parameters);
+  hr = m_swapChain->Present(1, 0);
 
   if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
     OnDeviceLost();
@@ -208,10 +203,8 @@ void DXGraphics::StartRenderLoop() {
   auto self = this;
   auto workItemHandler = ref new WorkItemHandler([self](IAsyncAction ^ action) {
     while (action->Status == AsyncStatus::Started) {
-      //self->m_timer.Tick([&]() {
         critical_section::scoped_lock lock(self->m_criticalSection);
         self->Render();
-      //});
 
       self->m_dxgiOutput->WaitForVBlank();
     }

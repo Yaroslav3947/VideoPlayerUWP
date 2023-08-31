@@ -11,6 +11,19 @@ namespace VideoPlayerWrapper {
   void StartRenderLoop();
   void StopRenderLoop();
 
+
+  //property Object ^
+  //    SwapChain {
+  //      Object ^ get() {
+  //        // Convert the ComPtr<IDXGISwapChain1> to Object^
+  //        // using reinterpret_cast or similar methods
+  //        return reinterpret_cast<Object ^>(m_swapChain.Get());
+  //      }
+  //    }
+
+  property Object ^
+      SwapChain { Object ^ get() { return reinterpret_cast<Object ^>(m_swapChain.Get()); } }
+
  private
  protected:
 
@@ -18,6 +31,7 @@ namespace VideoPlayerWrapper {
   void CreateDeviceIndependentResources();
   void CreateDeviceResources();
   void CreateSizeDependentResources();
+
 
   void OnDeviceLost();
 
@@ -28,7 +42,7 @@ namespace VideoPlayerWrapper {
   ComPtr<IDXGIOutput> m_dxgiOutput;
   ComPtr<ID3D11Device1> m_d3dDevice;
   ComPtr<ID3D11DeviceContext1> m_d3dContext;
-  ComPtr<IDXGISwapChain2> m_swapChain;
+  ComPtr<IDXGISwapChain1> m_swapChain;
   ComPtr<ID2D1RenderTarget> m_renderTarget;
   ComPtr<ID2D1Factory2> m_d2dFactory;
   ComPtr<ID2D1Device> m_d2dDevice;

@@ -4,11 +4,13 @@
 
 #include "../VideoPlayerStatic/VideoPlayer.h"
 
+#include "DXGraphics.h"
+
 namespace VideoPlayerWrapper {
 public
 ref class VideoPlayerWrp sealed {
  public:
-  VideoPlayerWrp();
+  VideoPlayerWrp(DXGraphics ^ swapChainPanel);
 
   void PlayPauseVideo();
   void OpenURL(Platform::String ^ sURL);

@@ -4,12 +4,25 @@
 
 using namespace VideoPlayerWrapper;
 
-VideoPlayerWrp::VideoPlayerWrp() { m_pVideoPlayer = new VideoPlayer(); }
+using namespace Concurrency;
+using namespace Windows::System::Threading;
+
+VideoPlayerWrp::VideoPlayerWrp(DXGraphics ^ swapChainPanel) {
+
+  ComPtr<IDXGISwapChain1> swapChain =
+      reinterpret_cast<IDXGISwapChain1*>(swapChainPanel->SwapChain);
+
+
+  m_pVideoPlayer = new VideoPlayer(swapChain);
+
+  //swapChainPanel->StartRenderLoop();
+}
 
 void VideoPlayerWrp::PlayPauseVideo() { m_pVideoPlayer->PlayPauseVideo(); }
 
 void VideoPlayerWrp::OpenURL(Platform::String ^ sURL) {
   const WCHAR* url = sURL->Data();
+
   m_pVideoPlayer->OpenURL(url);
 }
 

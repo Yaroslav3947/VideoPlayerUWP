@@ -6,6 +6,9 @@
 #include "Audio/MediaReader.h"
 #include "Audio/SoundEffect.h"
 
+#include "DXHelper.h"
+#include <dxgi1_2.h>
+
 #pragma comment(lib, "mf.lib")
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -21,10 +24,10 @@
 
 class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
  public:
-  VideoPlayer();
+  VideoPlayer(ComPtr<IDXGISwapChain1> swapChain);
   virtual ~VideoPlayer();
 
-  void Init();
+  void Init(ComPtr<IDXGISwapChain1> swapChain);
   void InitAudio();
   void StartPlayback();
   void InitAudioAndVideoTypes();
@@ -40,7 +43,7 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   inline bool GetIsPaused() const { return m_isPaused; }
 
   SoundEffect* GetSoundEffect() const { return m_soundEffect.get(); }
-  //DXHelper* GetDxHelper() const { return m_dxhelper.get(); }
+  DXHelper* GetDxHelper() const { return m_dxhelper.get(); }
 
  private:
   HRESULT GetWidthAndHeight();
@@ -65,7 +68,8 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
 
  private:
   ComPtr<IMFSourceReader> m_reader;
-  //std::unique_ptr<DXHelper> m_dxhelper;
+
+  std::unique_ptr<DXHelper> m_dxhelper;
   std::unique_ptr<MediaReader> m_mediaReader;
   std::unique_ptr<SoundEffect> m_soundEffect;
   std::unique_ptr<Audio> m_audio;

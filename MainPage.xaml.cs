@@ -23,23 +23,36 @@ namespace VideoPlayerUWP {
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class MainPage : Page {
+        private DXGraphics mySwapChainPanel;
+        private VideoPlayerWrp videoPlayer;
         public MainPage() {
             this.InitializeComponent();
+
+            mySwapChainPanel = new DXGraphics();
+            mySwapChainPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+            mySwapChainPanel.VerticalAlignment = VerticalAlignment.Stretch;
+
+            Grid.SetRow(mySwapChainPanel,0);
+            Grid.SetColumn(mySwapChainPanel,0);
+
+            mainGrid.Children.Add(mySwapChainPanel);
+
+            videoPlayer = new VideoPlayerWrp(mySwapChainPanel);
+
+
+            //videoPlayer.OpenURL("VideoMusk30fps.mp4");
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
 
-            mySwapChainPanel.StartRenderLoop();
+            videoPlayer.OpenURL("VideoMusk30fps.mp4");
 
-            VideoPlayerWrp videoPlayer = new VideoPlayerWrp();
-
-            videoPlayer.OpenURL("SampleVideo25fps.mp4");
-
+            //videoPlayer.OpenURL("SampleVideo25fps.mp4");
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e) {
-            mySwapChainPanel.StopRenderLoop();
+            //mySwapChainPanel.StopRenderLoop();
         }
     }
 }

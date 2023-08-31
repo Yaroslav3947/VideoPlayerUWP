@@ -3,12 +3,12 @@
 #include "VideoPlayer.h"
 
 
-VideoPlayer::VideoPlayer()
+VideoPlayer::VideoPlayer(ComPtr<IDXGISwapChain1> swapChain)
     : m_nRefCount(1),
       m_reader(nullptr),
       m_mediaReader(nullptr),
       m_soundEffect(nullptr) {
-  Init();
+  Init(swapChain);
 }
 
 //-----------------------------------------------------------------------------
@@ -45,9 +45,10 @@ ULONG VideoPlayer::Release() {
   return uCount;
 }
 
-void VideoPlayer::Init() {
+void VideoPlayer::Init(ComPtr<IDXGISwapChain1> swapChain) {
   winrt::check_hresult(MFStartup(MF_VERSION));
 
+  m_dxhelper = std::make_unique<DXHelper>(swapChain);
   m_mediaReader = std::make_unique<MediaReader>();
   m_soundEffect = std::make_unique<SoundEffect>();
   m_audio = std::make_unique<Audio>();
@@ -190,7 +191,7 @@ float VideoPlayer::GetFPS() {
 HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
                                   DWORD dwStreamFlags, LONGLONG llTimestamp,
                                   IMFSample *pSample) {
-  //std::lock_guard<std::mutex> lock(GetDxHelper()->GetResizeMtx());
+  std::lock_guard<std::mutex> lock(GetDxHelper()->GetResizeMtx());
 
   if (m_isPaused) {
     return S_OK;
@@ -203,10 +204,10 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
   m_streamIndex = dwStreamIndex;
 
   if (dwStreamIndex == (DWORD)StreamIndex::videoStreamIndex) {
-    /*ComPtr<ID2D1Bitmap> bitmap;
+    ComPtr<ID2D1Bitmap> bitmap;
     bitmap =
         m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
-    m_dxhelper->RenderBitmapOnWindow(bitmap);*/
+    m_dxhelper->RenderBitmapOnWindow(bitmap);
 
   } else if (dwStreamIndex == (DWORD)StreamIndex::audioStreamIndex) {
     auto soundData = m_mediaReader->LoadMedia(pSample);

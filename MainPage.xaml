@@ -9,11 +9,15 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Width="1600" Height="900">
 
-    <Page.Content>
-        <Grid>
+    <!--<Page.Content>
+        <Grid> 
             <graphics:DXGraphics x:Name="mySwapChainPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             </graphics:DXGraphics>
         </Grid>
-    </Page.Content>
+    </Page.Content>-->
+
+    <Grid x:Name="mainGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        
+    </Grid>
 
 </Page>
