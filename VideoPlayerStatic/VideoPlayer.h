@@ -24,10 +24,10 @@
 
 class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
  public:
-  VideoPlayer(ComPtr<IDXGISwapChain1> swapChain);
+  VideoPlayer(IDXGISwapChain1* swapChain);
   virtual ~VideoPlayer();
 
-  void Init(ComPtr<IDXGISwapChain1> swapChain);
+  void Init(IDXGISwapChain1* swapChain);
   void InitAudio();
   void StartPlayback();
   void InitAudioAndVideoTypes();

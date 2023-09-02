@@ -8,13 +8,6 @@ using namespace Concurrency;
 using namespace Windows::System::Threading;
 
 VideoPlayerWrp::VideoPlayerWrp(DXGraphics ^ swapChainPanel) {
-
-  ComPtr<IDXGISwapChain1> swapChain =
-      reinterpret_cast<IDXGISwapChain1*>(swapChainPanel->SwapChain);
-
-
-  m_pVideoPlayer = new VideoPlayer(swapChain);
-
   //swapChainPanel->StartRenderLoop();
 }
 

@@ -3,7 +3,7 @@
 #include "VideoPlayer.h"
 
 
-VideoPlayer::VideoPlayer(ComPtr<IDXGISwapChain1> swapChain)
+VideoPlayer::VideoPlayer(IDXGISwapChain1* swapChain)
     : m_nRefCount(1),
       m_reader(nullptr),
       m_mediaReader(nullptr),
@@ -45,7 +45,7 @@ ULONG VideoPlayer::Release() {
   return uCount;
 }
 
-void VideoPlayer::Init(ComPtr<IDXGISwapChain1> swapChain) {
+void VideoPlayer::Init(IDXGISwapChain1* swapChain) {
   winrt::check_hresult(MFStartup(MF_VERSION));
 
   m_dxhelper = std::make_unique<DXHelper>(swapChain);

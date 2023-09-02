@@ -24,7 +24,7 @@ namespace VideoPlayerUWP {
     /// </summary>
     public sealed partial class MainPage : Page {
         private DXGraphics mySwapChainPanel;
-        private VideoPlayerWrp videoPlayer;
+        //private VideoPlayerWrp videoPlayer;
         public MainPage() {
             this.InitializeComponent();
 
@@ -37,8 +37,10 @@ namespace VideoPlayerUWP {
 
             mainGrid.Children.Add(mySwapChainPanel);
 
-            videoPlayer = new VideoPlayerWrp(mySwapChainPanel);
+            //videoPlayer = new VideoPlayerWrp(mySwapChainPanel);
 
+
+            mySwapChainPanel.OpenURL("VideoMusk30fps.mp4");
 
             //videoPlayer.OpenURL("VideoMusk30fps.mp4");
         }
@@ -46,7 +48,7 @@ namespace VideoPlayerUWP {
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
 
-            videoPlayer.OpenURL("VideoMusk30fps.mp4");
+            //videoPlayer.OpenURL("VideoMusk30fps.mp4");
 
             //videoPlayer.OpenURL("SampleVideo25fps.mp4");
         }

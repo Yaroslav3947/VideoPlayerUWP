@@ -5,7 +5,7 @@
 
 class DXHelper {
  public:
-  DXHelper(ComPtr<IDXGISwapChain1> swapChain);
+  DXHelper(IDXGISwapChain1* swapChain);
   ~DXHelper() = default;
 
   void Init();
@@ -24,7 +24,8 @@ class DXHelper {
 
   //ComPtr<ID3D11Device> m_device;
   //ComPtr<ID3D11DeviceContext> m_deviceContext;
-  ComPtr<IDXGISwapChain1> m_swapChain;
+  //ComPtr<IDXGISwapChain1> m_swapChain;
+  IDXGISwapChain1*  m_swapChain;
 
   ComPtr<ID2D1Factory1> m_factory;
   ComPtr<ID2D1RenderTarget> m_renderTarget;

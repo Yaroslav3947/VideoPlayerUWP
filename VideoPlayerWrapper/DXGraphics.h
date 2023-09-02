@@ -2,36 +2,26 @@
 
 #include "pch.h"
 
+#include "../VideoPlayerStatic/VideoPlayer.h"
+
 namespace VideoPlayerWrapper {
 [Windows::Foundation::Metadata::WebHostHidden] public ref class DXGraphics sealed
     : public Windows::UI::Xaml::Controls::SwapChainPanel {
  public:
   DXGraphics();
-  void Render();
-  void StartRenderLoop();
-  void StopRenderLoop();
-
-
-  //property Object ^
-  //    SwapChain {
-  //      Object ^ get() {
-  //        // Convert the ComPtr<IDXGISwapChain1> to Object^
-  //        // using reinterpret_cast or similar methods
-  //        return reinterpret_cast<Object ^>(m_swapChain.Get());
-  //      }
-  //    }
-
-  property Object ^
-      SwapChain { Object ^ get() { return reinterpret_cast<Object ^>(m_swapChain.Get()); } }
+  void StartVideoPlayer();
+  void PlayPauseVideo();
+  void OpenURL(Platform::String ^ sURL);
+  void SetPosition(Windows::Foundation::TimeSpan position);
+  long long GetDuration();
+  bool GetIsPaused() { return m_videoPlayer->GetIsPaused(); }
 
  private
  protected:
 
-  void Present();
   void CreateDeviceIndependentResources();
   void CreateDeviceResources();
   void CreateSizeDependentResources();
-
 
   void OnDeviceLost();
 
@@ -43,7 +33,7 @@ namespace VideoPlayerWrapper {
   ComPtr<ID3D11Device1> m_d3dDevice;
   ComPtr<ID3D11DeviceContext1> m_d3dContext;
   ComPtr<IDXGISwapChain1> m_swapChain;
-  ComPtr<ID2D1RenderTarget> m_renderTarget;
+  //IDXGISwapChain1* m_swapChain;
   ComPtr<ID2D1Factory2> m_d2dFactory;
   ComPtr<ID2D1Device> m_d2dDevice;
 
@@ -60,12 +50,11 @@ namespace VideoPlayerWrapper {
 
   bool m_loadingComplete = false;
 
-  Windows::Foundation::IAsyncAction ^ m_renderLoopWorker;
-
-  DX::StepTimer m_timer;
-
  private:
+  VideoPlayer* m_videoPlayer;
+
   ~DXGraphics();
+
 };
 
 }  // namespace VideoPlayerWrapper

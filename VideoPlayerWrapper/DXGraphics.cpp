@@ -22,18 +22,25 @@ static const float m_dipsPerInch = 96.0f;
 DXGraphics::DXGraphics()
     : m_compositionScaleX(1.0f),
       m_compositionScaleY(1.0f),
-      m_height(1.0f),
-      m_width(1.0f),
+      m_width(1920.0f),
+      m_height(1080.0f),
       m_swapChain(nullptr) {
 
-    this->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(this, &DXGraphics ::OnSizeChanged);
+  /*  this->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(this, &DXGraphics ::OnSizeChanged);
   this->CompositionScaleChanged +=
       ref new Windows::Foundation::TypedEventHandler<SwapChainPanel ^,
-                                                     Object ^>(this, &DXGraphics::OnCompositionScaleChanged);
+                                                     Object ^>(this, &DXGraphics::OnCompositionScaleChanged);*/
 
   CreateDeviceIndependentResources();
   CreateDeviceResources();
   CreateSizeDependentResources();
+
+  StartVideoPlayer();
+
+}
+
+void DXGraphics::StartVideoPlayer() {
+  m_videoPlayer = new VideoPlayer(m_swapChain.Get());
 }
 
 void DXGraphics::CreateDeviceIndependentResources() {
@@ -70,14 +77,6 @@ void DXGraphics::CreateDeviceResources() {
   ComPtr<IDXGIDevice> dxgiDevice;
   winrt::check_hresult(m_d3dDevice.As(&dxgiDevice));
 
-  ComPtr<IDXGIFactory1> dxgiFactory;
-  winrt::check_hresult(CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
-
-  ComPtr<IDXGIAdapter> dxgiAdapter;
-  winrt::check_hresult(dxgiFactory->EnumAdapters(0, &dxgiAdapter));
-
-  winrt::check_hresult(dxgiAdapter->EnumOutputs(0, &m_dxgiOutput));
-
   m_loadingComplete = true;
 }
 
@@ -87,9 +86,6 @@ void DXGraphics::CreateSizeDependentResources() {
 
   // // If the swap chain already exists, then resize it.
   //if (m_swapChain != nullptr) {
-  //  if (m_renderTarget) {
-  //    m_renderTarget.Reset();
-  //  }
   //  HRESULT hr = m_swapChain->ResizeBuffers(
   //      2, static_cast<UINT>(m_renderTargetWidth),
   //      static_cast<UINT>(m_renderTargetHeight), DXGI_FORMAT_B8G8R8A8_UNORM, 0);
@@ -102,7 +98,7 @@ void DXGraphics::CreateSizeDependentResources() {
   //    winrt::check_hresult(hr);
   //  }
   //} else  // Otherwise, create a new one.
-  {
+  //{
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {0};
     swapChainDesc.Width = static_cast<UINT>(m_renderTargetWidth);
     swapChainDesc.Height = static_cast<UINT>(m_renderTargetHeight);
@@ -133,6 +129,7 @@ void DXGraphics::CreateSizeDependentResources() {
     // Create swap chain.
     winrt::check_hresult(dxgiFactory->CreateSwapChainForComposition(
         m_d3dDevice.Get(), &swapChainDesc, nullptr, &swapChain));
+
     swapChain.As(&m_swapChain);
 
     winrt::check_hresult(dxgiDevice->SetMaximumFrameLatency(1));
@@ -151,77 +148,13 @@ void DXGraphics::CreateSizeDependentResources() {
                   panelNative->SetSwapChain(m_swapChain.Get()));
             },
             CallbackContext::Any));
-  }
-
-  ComPtr<IDXGISurface> dxgiBackbuffer;
-  m_swapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackbuffer));
-
-  D2D1_RENDER_TARGET_PROPERTIES renderTargetProps =
-      D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_HARDWARE,
-                                   D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
-                                                     D2D1_ALPHA_MODE_IGNORE));
-
-  winrt::check_hresult(m_d2dFactory->CreateDxgiSurfaceRenderTarget(
-      dxgiBackbuffer.Get(), &renderTargetProps, m_renderTarget.GetAddressOf()));
+  //}
 }
 
-void DXGraphics::Render() {
-  if (!m_loadingComplete) {
-    return;
-  }
-
-  m_renderTarget->BeginDraw();
-  m_renderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
-  m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Blue));
-  m_renderTarget->EndDraw();
-
-  Present();
-}
-
-void DXGraphics::Present() {
-  HRESULT hr = S_OK;
-
-  hr = m_swapChain->Present(1, 0);
-
-  if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
-    OnDeviceLost();
-    return;
-  } else {
-    winrt::check_hresult(hr);
-  }
-}
-
-DXGraphics::~DXGraphics() { m_renderLoopWorker->Cancel(); }
-
-
-void DXGraphics::StartRenderLoop() {
-  if (m_renderLoopWorker != nullptr &&
-      m_renderLoopWorker->Status == AsyncStatus::Started) {
-    return;
-  }
-
-  auto self = this;
-  auto workItemHandler = ref new WorkItemHandler([self](IAsyncAction ^ action) {
-    while (action->Status == AsyncStatus::Started) {
-        critical_section::scoped_lock lock(self->m_criticalSection);
-        self->Render();
-
-      self->m_dxgiOutput->WaitForVBlank();
-    }
-  });
-
-  m_renderLoopWorker = ThreadPool::RunAsync(
-      workItemHandler, WorkItemPriority::High, WorkItemOptions::TimeSliced);
-}
-
-void DXGraphics::StopRenderLoop() { m_renderLoopWorker->Cancel(); }
+DXGraphics::~DXGraphics() {  }
 
 void DXGraphics::OnDeviceLost() {
   m_loadingComplete = false;
-
-  m_renderTarget = nullptr;
-  m_renderTarget->Flush();
-  m_renderTarget.Reset();
 
   m_swapChain = nullptr;
 
@@ -235,7 +168,6 @@ void DXGraphics::OnDeviceLost() {
   CreateDeviceResources();
   CreateSizeDependentResources();
 
-  Render();
 }
 
 void DXGraphics::OnSizeChanged(Object ^ sender, SizeChangedEventArgs ^ e) {
@@ -260,4 +192,20 @@ void DXGraphics::OnCompositionScaleChanged(SwapChainPanel ^ sender,
 
     CreateSizeDependentResources();
   }
+}
+
+void DXGraphics::PlayPauseVideo() { m_videoPlayer->PlayPauseVideo(); }
+
+void DXGraphics::OpenURL(Platform::String ^ sURL) {
+  const WCHAR* url = sURL->Data();
+
+  m_videoPlayer->OpenURL(url);
+}
+
+void DXGraphics::SetPosition(Windows::Foundation::TimeSpan position) {
+  m_videoPlayer->SetPosition(position.Duration);
+}
+
+long long DXGraphics::GetDuration() {
+  return m_videoPlayer->GetDuration();
 }
