@@ -8,6 +8,7 @@ using VideoPlayerWrapper;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.System;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -23,38 +24,29 @@ namespace VideoPlayerUWP {
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class MainPage : Page {
-        private DXGraphics mySwapChainPanel;
+        //private DXGraphics mySwapChainPanel;
         //private VideoPlayerWrp videoPlayer;
         public MainPage() {
             this.InitializeComponent();
 
-            mySwapChainPanel = new DXGraphics();
-            mySwapChainPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
-            mySwapChainPanel.VerticalAlignment = VerticalAlignment.Stretch;
+            Window.Current.SizeChanged += Window_SizeChanged;
 
-            Grid.SetRow(mySwapChainPanel,0);
-            Grid.SetColumn(mySwapChainPanel,0);
-
-            mainGrid.Children.Add(mySwapChainPanel);
-
-            //videoPlayer = new VideoPlayerWrp(mySwapChainPanel);
-
-
-            mySwapChainPanel.OpenURL("VideoMusk30fps.mp4");
-
-            //videoPlayer.OpenURL("VideoMusk30fps.mp4");
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
 
-            //videoPlayer.OpenURL("VideoMusk30fps.mp4");
-
-            //videoPlayer.OpenURL("SampleVideo25fps.mp4");
+            mySwapChainPanel.OpenURL("VideoMusk30fps.mp4");
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e) {
-            //mySwapChainPanel.StopRenderLoop();
+        }
+
+        private void Window_SizeChanged(object sender,WindowSizeChangedEventArgs e) {
+            double newWidth = e.Size.Width;
+            double newHeight = e.Size.Height;
+
+            mySwapChainPanel.ResizeSwapChainPanel(newWidth,newHeight);
         }
     }
 }

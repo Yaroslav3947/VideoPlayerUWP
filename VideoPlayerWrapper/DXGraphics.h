@@ -15,6 +15,7 @@ namespace VideoPlayerWrapper {
   void SetPosition(Windows::Foundation::TimeSpan position);
   long long GetDuration();
   bool GetIsPaused() { return m_videoPlayer->GetIsPaused(); }
+  void ResizeSwapChainPanel(double width, double height);
 
  private
  protected:
@@ -25,7 +26,7 @@ namespace VideoPlayerWrapper {
 
   void OnDeviceLost();
 
-  void OnSizeChanged(Platform::Object ^ sender, Windows::UI::Xaml::SizeChangedEventArgs ^ e);
+  //void OnSizeChanged(Platform::Object ^ sender, Windows::UI::Xaml::SizeChangedEventArgs ^ e);
   void OnCompositionScaleChanged(Windows::UI::Xaml::Controls::SwapChainPanel ^ sender,
                                  Platform::Object ^ args);
 

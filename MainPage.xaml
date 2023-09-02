@@ -10,14 +10,17 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Width="1600" Height="900">
 
     <!--<Page.Content>
-        <Grid> 
-            <graphics:DXGraphics x:Name="mySwapChainPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            </graphics:DXGraphics>
-        </Grid>
+        <graphics:DXGraphics x:Name="mySwapChainPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        </graphics:DXGraphics>
     </Page.Content>-->
 
-    <Grid x:Name="mainGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <!--<Grid x:Name="mainGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         
+    </Grid>-->
+
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <graphics:DXGraphics x:Name="mySwapChainPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
     </Grid>
+
 
 </Page>

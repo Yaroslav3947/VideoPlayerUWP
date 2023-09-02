@@ -16,20 +16,28 @@ using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::Storage::Streams;
 using namespace Windows::System::Threading;
+  using namespace Windows::Foundation::Diagnostics;
 
 static const float m_dipsPerInch = 96.0f;
 
 DXGraphics::DXGraphics()
     : m_compositionScaleX(1.0f),
       m_compositionScaleY(1.0f),
-      m_width(1920.0f),
-      m_height(1080.0f),
+      m_width(1.0f),
+      m_height(1.0f),
       m_swapChain(nullptr) {
 
-  /*  this->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(this, &DXGraphics ::OnSizeChanged);
+    /*this->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(this, &DXGraphics ::OnSizeChanged);
   this->CompositionScaleChanged +=
       ref new Windows::Foundation::TypedEventHandler<SwapChainPanel ^,
                                                      Object ^>(this, &DXGraphics::OnCompositionScaleChanged);*/
+
+    /*this->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(
+        this, &DXGraphics::OnSizeChanged);*/
+    this->CompositionScaleChanged +=
+        ref new Windows::Foundation::TypedEventHandler<SwapChainPanel ^,
+                                                       Object ^>(
+            this, &DXGraphics::OnCompositionScaleChanged);
 
   CreateDeviceIndependentResources();
   CreateDeviceResources();
@@ -84,71 +92,54 @@ void DXGraphics::CreateSizeDependentResources() {
   m_renderTargetWidth = m_width * m_compositionScaleX;
   m_renderTargetHeight = m_height * m_compositionScaleY;
 
-  // // If the swap chain already exists, then resize it.
-  //if (m_swapChain != nullptr) {
-  //  HRESULT hr = m_swapChain->ResizeBuffers(
-  //      2, static_cast<UINT>(m_renderTargetWidth),
-  //      static_cast<UINT>(m_renderTargetHeight), DXGI_FORMAT_B8G8R8A8_UNORM, 0);
+  DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {0};
+  swapChainDesc.Width = static_cast<UINT>(m_renderTargetWidth);
+  swapChainDesc.Height = static_cast<UINT>(m_renderTargetHeight);
+  swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+  swapChainDesc.Stereo = false;
+  swapChainDesc.SampleDesc.Count = 1;
+  swapChainDesc.SampleDesc.Quality = 0;
+  swapChainDesc.BufferUsage =
+      DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  swapChainDesc.BufferCount = 2;
+  swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+  swapChainDesc.Flags = 0;
+  swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 
-  //  if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
-  //    OnDeviceLost();
-  //    return;
+  // Get underlying DXGI Device from D3D Device.
+  ComPtr<IDXGIDevice1> dxgiDevice;
+  winrt::check_hresult(m_d3dDevice.As(&dxgiDevice));
 
-  //  } else {
-  //    winrt::check_hresult(hr);
-  //  }
-  //} else  // Otherwise, create a new one.
-  //{
-    DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {0};
-    swapChainDesc.Width = static_cast<UINT>(m_renderTargetWidth);
-    swapChainDesc.Height = static_cast<UINT>(m_renderTargetHeight);
-    swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-    swapChainDesc.Stereo = false;
-    swapChainDesc.SampleDesc.Count = 1;
-    swapChainDesc.SampleDesc.Quality = 0;
-    swapChainDesc.BufferUsage =
-        DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swapChainDesc.BufferCount = 2;
-    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-    swapChainDesc.Flags = 0;
-    swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+  // Get adapter.
+  ComPtr<IDXGIAdapter> dxgiAdapter;
+  winrt::check_hresult(dxgiDevice->GetAdapter(&dxgiAdapter));
 
-    // Get underlying DXGI Device from D3D Device.
-    ComPtr<IDXGIDevice1> dxgiDevice;
-    winrt::check_hresult(m_d3dDevice.As(&dxgiDevice));
+  // Get factory.
+  ComPtr<IDXGIFactory2> dxgiFactory;
+  winrt::check_hresult(dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory)));
 
-    // Get adapter.
-    ComPtr<IDXGIAdapter> dxgiAdapter;
-    winrt::check_hresult(dxgiDevice->GetAdapter(&dxgiAdapter));
+  ComPtr<IDXGISwapChain1> swapChain;
+  // Create swap chain.
+  winrt::check_hresult(dxgiFactory->CreateSwapChainForComposition(
+      m_d3dDevice.Get(), &swapChainDesc, nullptr, &swapChain));
 
-    // Get factory.
-    ComPtr<IDXGIFactory2> dxgiFactory;
-    winrt::check_hresult(dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory)));
+  swapChain.As(&m_swapChain);
 
-    ComPtr<IDXGISwapChain1> swapChain;
-    // Create swap chain.
-    winrt::check_hresult(dxgiFactory->CreateSwapChainForComposition(
-        m_d3dDevice.Get(), &swapChainDesc, nullptr, &swapChain));
+  winrt::check_hresult(dxgiDevice->SetMaximumFrameLatency(1));
 
-    swapChain.As(&m_swapChain);
+  Dispatcher->RunAsync(
+      CoreDispatcherPriority::Normal,
+      ref new DispatchedHandler(
+          [=]() {
+            // Get backing native interface for SwapChainPanel.
+            ComPtr<ISwapChainPanelNative> panelNative;
+            winrt::check_hresult(
+                reinterpret_cast<IUnknown*>(this)->QueryInterface(
+                    IID_PPV_ARGS(&panelNative)));
 
-    winrt::check_hresult(dxgiDevice->SetMaximumFrameLatency(1));
-
-    Dispatcher->RunAsync(
-        CoreDispatcherPriority::Normal,
-        ref new DispatchedHandler(
-            [=]() {
-              // Get backing native interface for SwapChainPanel.
-              ComPtr<ISwapChainPanelNative> panelNative;
-              winrt::check_hresult(
-                  reinterpret_cast<IUnknown*>(this)->QueryInterface(
-                      IID_PPV_ARGS(&panelNative)));
-
-              winrt::check_hresult(
-                  panelNative->SetSwapChain(m_swapChain.Get()));
-            },
-            CallbackContext::Any));
-  //}
+            winrt::check_hresult(panelNative->SetSwapChain(m_swapChain.Get()));
+          },
+          CallbackContext::Any));
 }
 
 DXGraphics::~DXGraphics() {  }
@@ -170,16 +161,17 @@ void DXGraphics::OnDeviceLost() {
 
 }
 
-void DXGraphics::OnSizeChanged(Object ^ sender, SizeChangedEventArgs ^ e) {
-  if (m_width != e->NewSize.Width || m_height != e->NewSize.Height) {
-    critical_section::scoped_lock lock(m_criticalSection);
-
-    m_width = max(e->NewSize.Width, 1.0f);
-    m_height = max(e->NewSize.Height, 1.0f);
-
-    CreateSizeDependentResources();
-  }
-}
+//void DXGraphics::OnSizeChanged(Object ^ sender, SizeChangedEventArgs ^ e) {
+//  /*if (m_width != e->NewSize.Width || m_height != e->NewSize.Height) {
+//    critical_section::scoped_lock lock(m_criticalSection);
+//
+//    m_width = max(e->NewSize.Width, 1.0f);
+//    m_height = max(e->NewSize.Height, 1.0f);*/
+//
+//    //CreateSizeDependentResources();
+//    ResizeSwapChainPanel(e->NewSize.Width, e->NewSize.Height);
+//  //}
+//}
 
 void DXGraphics::OnCompositionScaleChanged(SwapChainPanel ^ sender,
                                                 Object ^ args) {
@@ -207,5 +199,8 @@ void DXGraphics::SetPosition(Windows::Foundation::TimeSpan position) {
 }
 
 long long DXGraphics::GetDuration() {
-  return m_videoPlayer->GetDuration();
+  return m_videoPlayer->GetDuration(); }
+
+void DXGraphics::ResizeSwapChainPanel(double width, double height) {
+  m_videoPlayer->GetDxHelper()->ResizeRenderTarget(width, height);
 }
