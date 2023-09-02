@@ -45,4 +45,4 @@ namespace VideoPlayerWrapper {
   ~VideoPlayerWrap();
 };
 
-}  // namespace Video
+}  // namespace VideoPlayerWrapper

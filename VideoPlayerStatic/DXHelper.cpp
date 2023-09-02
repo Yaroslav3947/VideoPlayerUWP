@@ -1,6 +1,8 @@
 #include "DXHelper.h"
 
-DXHelper::DXHelper(IDXGISwapChain1* swapChain) : m_swapChain(swapChain){ Init(); }
+DXHelper::DXHelper(ComPtr<IDXGISwapChain1> swapChain) : m_swapChain(swapChain) {
+  Init();
+}
 
 void DXHelper::Init() {
   winrt::check_hresult(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,

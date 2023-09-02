@@ -1,11 +1,10 @@
 #pragma once
 
 #include "Include.h"
-#include <dxgi1_2.h>
 
 class DXHelper {
  public:
-  DXHelper(IDXGISwapChain1* swapChain);
+  DXHelper(ComPtr<IDXGISwapChain1> swapChain);
   ~DXHelper() = default;
 
   void Init();
@@ -19,10 +18,9 @@ class DXHelper {
   std::mutex& GetResizeMtx() { return m_resize_mtx; }
 
  private:
-
   std::mutex m_resize_mtx;
 
-  IDXGISwapChain1*  m_swapChain;
+  ComPtr<IDXGISwapChain1> m_swapChain;
 
   ComPtr<ID2D1Factory1> m_factory;
   ComPtr<ID2D1RenderTarget> m_renderTarget;

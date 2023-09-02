@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
-#include "VideoPlayerWrapper.h"
+#include "VideoPlayerWrap.h"
+
 
 using namespace VideoPlayerWrapper;
 
@@ -15,10 +16,8 @@ using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::Storage::Streams;
 using namespace Windows::System::Threading;
 
-
 VideoPlayerWrap::VideoPlayerWrap()
-    : m_width(1600.0f),
-      m_height(900.0f) {
+    : m_width(1600.0f), m_height(900.0f) {  ////TODO: get rid of magic numbers
 
   CreateDeviceIndependentResources();
   CreateDeviceResources();
@@ -130,7 +129,6 @@ void VideoPlayerWrap::OnDeviceLost() {
 
   CreateDeviceResources();
   CreateSizeDependentResources();
-
 }
 
 void VideoPlayerWrap::PlayPauseVideo() { m_videoPlayer->PlayPauseVideo(); }
@@ -146,7 +144,8 @@ void VideoPlayerWrap::SetPosition(Windows::Foundation::TimeSpan position) {
 }
 
 long long VideoPlayerWrap::GetDuration() {
-  return m_videoPlayer->GetDuration(); }
+  return m_videoPlayer->GetDuration();
+}
 
 void VideoPlayerWrap::ResizeSwapChainPanel(double width, double height) {
   m_videoPlayer->GetDxHelper()->ResizeRenderTarget(width, height);

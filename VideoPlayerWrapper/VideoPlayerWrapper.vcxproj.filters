@@ -8,10 +8,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="VideoPlayerWrapper.cpp" />
+    <ClCompile Include="VideoPlayerWrap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="VideoPlayerWrapper.h" />
+    <ClInclude Include="VideoPlayerWrap.h" />
   </ItemGroup>
 </Project>
