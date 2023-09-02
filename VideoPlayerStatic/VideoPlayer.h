@@ -1,13 +1,10 @@
 #pragma once
 
-#include "Include.h"
-
 #include "Audio/Audio.h"
 #include "Audio/MediaReader.h"
 #include "Audio/SoundEffect.h"
-
 #include "DXHelper.h"
-#include <dxgi1_2.h>
+#include "Include.h"
 
 #pragma comment(lib, "mf.lib")
 #pragma comment(lib, "d2d1.lib")
@@ -20,7 +17,6 @@
 #pragma comment(lib, "Propsys.lib")
 #pragma comment(lib, "mfreadwrite.lib")
 #pragma comment(lib, "wmcodecdspuuid.lib")
-
 
 class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
  public:

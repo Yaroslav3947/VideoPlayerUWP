@@ -1,7 +1,6 @@
-#include "Include.h"
-
 #include "VideoPlayer.h"
 
+#include "Include.h"
 
 VideoPlayer::VideoPlayer(ComPtr<IDXGISwapChain1> swapChain)
     : m_nRefCount(1),

@@ -1,26 +1,10 @@
 #include "DXHelper.h"
 
-DXHelper::DXHelper(ComPtr<IDXGISwapChain1> swapChain)
-    : m_swapChain(swapChain) {
+DXHelper::DXHelper(ComPtr<IDXGISwapChain1> swapChain) : m_swapChain(swapChain) {
   Init();
 }
 
 void DXHelper::Init() {
-  /*D3D_FEATURE_LEVEL levels[] = {D3D_FEATURE_LEVEL_9_1,  D3D_FEATURE_LEVEL_9_2,
-                                D3D_FEATURE_LEVEL_9_3,  D3D_FEATURE_LEVEL_10_0,
-                                D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_11_0,
-                                D3D_FEATURE_LEVEL_11_1};
-
-  UINT deviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-
-  D3D_FEATURE_LEVEL m_featureLevel;
-
-  winrt::check_hresult(D3D11CreateDeviceAndSwapChain(
-      nullptr, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE, nullptr, deviceFlags,
-      levels, ARRAYSIZE(levels), D3D11_SDK_VERSION, &m_swapChainDesc,
-      m_swapChain.GetAddressOf(), m_device.GetAddressOf(), &m_featureLevel,
-      m_deviceContext.GetAddressOf()));*/
-
   winrt::check_hresult(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
                                          __uuidof(ID2D1Factory1), &m_factory));
 

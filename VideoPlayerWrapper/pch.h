@@ -21,7 +21,6 @@
 
 #include <concrt.h>
 
-#include "StepTimer.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace Windows::Foundation;
