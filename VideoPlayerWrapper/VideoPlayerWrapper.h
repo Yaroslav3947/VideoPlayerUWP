@@ -1,25 +1,48 @@
-#pragma once
+﻿#pragma once
 
 #include "pch.h"
 
 #include "../VideoPlayerStatic/VideoPlayer.h"
 
-#include "DXGraphics.h"
-
 namespace VideoPlayerWrapper {
-public
-ref class VideoPlayerWrp sealed {
+[Windows::Foundation::Metadata::WebHostHidden] public ref class VideoPlayerWrap sealed
+    : public Windows::UI::Xaml::Controls::SwapChainPanel {
  public:
-  VideoPlayerWrp(DXGraphics ^ swapChainPanel);
+  VideoPlayerWrap();
 
   void PlayPauseVideo();
   void OpenURL(Platform::String ^ sURL);
   void SetPosition(Windows::Foundation::TimeSpan position);
   long long GetDuration();
-  bool GetIsPaused() { return m_pVideoPlayer->GetIsPaused(); }
+  bool GetIsPaused() { return m_videoPlayer->GetIsPaused(); }
+  void ResizeSwapChainPanel(double width, double height);
+
+ private
+ protected:
+  void CreateDeviceIndependentResources();
+  void CreateDeviceResources();
+  void CreateSizeDependentResources();
+
+  void OnDeviceLost();
+
+  ComPtr<IDXGIOutput> m_dxgiOutput;
+  ComPtr<ID3D11Device1> m_d3dDevice;
+  ComPtr<ID3D11DeviceContext1> m_d3dContext;
+  ComPtr<IDXGISwapChain1> m_swapChain;
+  ComPtr<ID2D1Factory2> m_d2dFactory;
+  ComPtr<ID2D1Device> m_d2dDevice;
+
+  Concurrency::critical_section m_criticalSection;
+
+  float m_height;
+  float m_width;
+
+  bool m_loadingComplete = false;
 
  private:
-  VideoPlayer* m_pVideoPlayer;
+  VideoPlayer* m_videoPlayer;
+
+  ~VideoPlayerWrap();
 };
 
-}  // namespace VideoPlayerWrapper
+}  // namespace Video

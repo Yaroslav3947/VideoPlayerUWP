@@ -24,18 +24,14 @@ namespace VideoPlayerUWP {
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class MainPage : Page {
-        //private DXGraphics mySwapChainPanel;
-        //private VideoPlayerWrp videoPlayer;
         public MainPage() {
             this.InitializeComponent();
 
             Window.Current.SizeChanged += Window_SizeChanged;
-
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
-
             mySwapChainPanel.OpenURL("VideoMusk30fps.mp4");
         }
 
@@ -44,9 +40,26 @@ namespace VideoPlayerUWP {
 
         private void Window_SizeChanged(object sender,WindowSizeChangedEventArgs e) {
             double newWidth = e.Size.Width;
-            double newHeight = e.Size.Height;
+            double newHeight = e.Size.Height - 40; ////TODO: get the actual size of bottom panel
+
 
             mySwapChainPanel.ResizeSwapChainPanel(newWidth,newHeight);
+        }
+
+        private void PlayPauseButton_Click(object sender,RoutedEventArgs e) {
+
+        }
+
+        private void MuteButton_Click_(object sender,RoutedEventArgs e) {
+
+        }
+
+        private void videoSlider_ValueChanged(object sender,RangeBaseValueChangedEventArgs e) {
+
+        }
+
+        private void VideoTimeTextBlock_SelectionChanged(object sender,RoutedEventArgs e) {
+
         }
     }
 }

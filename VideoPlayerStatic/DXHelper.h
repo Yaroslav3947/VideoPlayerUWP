@@ -22,9 +22,6 @@ class DXHelper {
 
   std::mutex m_resize_mtx;
 
-  //ComPtr<ID3D11Device> m_device;
-  //ComPtr<ID3D11DeviceContext> m_deviceContext;
-  //ComPtr<IDXGISwapChain1> m_swapChain;
   IDXGISwapChain1*  m_swapChain;
 
   ComPtr<ID2D1Factory1> m_factory;

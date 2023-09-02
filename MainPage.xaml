@@ -7,20 +7,27 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Width="1600" Height="900">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <!--<Page.Content>
-        <graphics:DXGraphics x:Name="mySwapChainPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-        </graphics:DXGraphics>
-    </Page.Content>-->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-    <!--<Grid x:Name="mainGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        
-    </Grid>-->
+        <graphics:VideoPlayerWrap x:Name="mySwapChainPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0" />
 
-    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-        <graphics:DXGraphics x:Name="mySwapChainPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="PlayPauseButton" Content="Play" Margin="5" Click="PlayPauseButton_Click"/>
+            <Button x:Name="MuteButton" Content="Mute" Grid.Column="1" Click="MuteButton_Click_"/>
+
+            <Slider x:Name="videoSlider" Margin="178,5,-86,5" Grid.Column="1" ValueChanged="videoSlider_ValueChanged"/>
+            <TextBlock x:Name="VideoTimeTextBlock" Grid.Column="1" HorizontalAlignment="Left" Margin="58,0,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Center" Height="32" Width="115" SelectionChanged="VideoTimeTextBlock_SelectionChanged"/>
+        </Grid>
     </Grid>
-
-
 </Page>

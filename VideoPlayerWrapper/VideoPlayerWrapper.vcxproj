@@ -272,8 +272,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="DXGraphics.h" />
-    <ClInclude Include="StepTimer.h" />
     <ClInclude Include="VideoPlayerWrapper.h" />
   </ItemGroup>
   <ItemGroup>
@@ -287,7 +285,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="DXGraphics.cpp" />
     <ClCompile Include="VideoPlayerWrapper.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
