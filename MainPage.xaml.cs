@@ -30,22 +30,59 @@ namespace VideoPlayerUWP {
             this.InitializeComponent();
 
             Window.Current.SizeChanged += Window_SizeChanged;
+
+            videoSlider.ValueChanged += OnSliderMoved;
+            videoSlider.PointerPressed += OnSliderPressed;
+            videoSlider.PointerReleased += OnSliderReleased;
+        }
+
+        private void OnSliderReleased(object sender,PointerRoutedEventArgs e) {
+            Debug.WriteLine("Slider released");
+            if(videoPlayer.GetIsPaused()) {
+                videoPlayer.PlayPauseVideo();
+                ////TODO: change the icon to pause
+            }
+        }
+
+        private void OnSliderPressed(object sender,PointerRoutedEventArgs e) {
+            Debug.WriteLine("Slider pressed");
+            if(!videoPlayer.GetIsPaused()) {
+                videoPlayer.PlayPauseVideo();
+            }
+        }
+
+        private void OnSliderMoved(object sender,RangeBaseValueChangedEventArgs e) {
+            long sliderValue = (long)e.NewValue;
+
+            //Debug.WriteLine("Slider moved" + sliderValue);
+
+            videoPlayer.SetPosition(sliderValue * 100);
+        }
+        private void OnPositionChanged(long newPosition) {
+            videoSlider.Value = newPosition;
+
+            UpdateDurationInfo(newPosition * 100);
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
-            videoPlayer.OpenURL("VideoMusk30fps.mp4");
+            //videoPlayer.OpenURL("VideoMusk30fps.mp4");
+            videoPlayer.OpenURL("SampleVideo25fps.mp4");
 
-            UpdateDurationInfo(20000000);
+            long maxSliderValue = videoPlayer.GetDuration() / 100;
+
+            videoSlider.Minimum = 0;
+            videoSlider.Maximum = maxSliderValue;
+
+            //UpdateDurationInfo(20000000);
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e) {
         }
 
         private void Window_SizeChanged(object sender,WindowSizeChangedEventArgs e) {
-            double newWidth = e.Size.Width;
-            double newHeight = e.Size.Height - 40; ////TODO: get the actual size of bottom panel
-
+            double newWidth = videoGrid.ActualWidth;
+            double newHeight = videoGrid.ActualHeight;
 
             videoPlayer.ResizeSwapChainPanel(newWidth,newHeight);
         }
@@ -62,14 +99,6 @@ namespace VideoPlayerUWP {
                 videoPlayer.Mute();
                 ////TODO: change the icon
             }
-        }
-
-        private void videoSlider_ValueChanged(object sender,RangeBaseValueChangedEventArgs e) {
-
-        }
-
-        private void VideoTimeTextBlock_SelectionChanged(object sender,RoutedEventArgs e) {
-
         }
 
         public void UpdateDurationInfo(long currentPosition) {
@@ -96,10 +125,7 @@ namespace VideoPlayerUWP {
 
             StorageFile file = await filePicker.PickSingleFileAsync();
             if(file != null) {
-                // Handle the selected MP4 file here
-                // You can signal to it or perform any other actions
                 string selectedFilePath = file.Path;
-                // Signal or process the selected file
             }
 
         }

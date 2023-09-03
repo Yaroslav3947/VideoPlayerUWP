@@ -46,7 +46,6 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
     m_soundEffect->ChangeVolume(volume);
   }
 
-  //SoundEffect* GetSoundEffect() const { return m_soundEffect.get(); }
   DXHelper* GetDxHelper() const { return m_dxhelper.get(); }
 
  private:

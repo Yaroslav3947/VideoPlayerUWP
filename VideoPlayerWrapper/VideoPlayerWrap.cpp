@@ -139,8 +139,8 @@ void VideoPlayerWrap::OpenURL(Platform::String ^ sURL) {
   m_videoPlayer->OpenURL(url);
 }
 
-void VideoPlayerWrap::SetPosition(Windows::Foundation::TimeSpan position) {
-  m_videoPlayer->SetPosition(position.Duration);
+void VideoPlayerWrap::SetPosition(long long position) {
+  m_videoPlayer->SetPosition(position);
 }
 
 long long VideoPlayerWrap::GetDuration() {

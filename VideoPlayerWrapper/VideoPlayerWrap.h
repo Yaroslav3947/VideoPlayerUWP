@@ -12,7 +12,7 @@ namespace VideoPlayerWrapper {
 
   void PlayPauseVideo();
   void OpenURL(Platform::String ^ sURL);
-  void SetPosition(Windows::Foundation::TimeSpan position);
+  void SetPosition(long long position);
   long long GetDuration();
   bool GetIsPaused() { return m_videoPlayer->GetIsPaused(); }
   void ResizeSwapChainPanel(double width, double height);
