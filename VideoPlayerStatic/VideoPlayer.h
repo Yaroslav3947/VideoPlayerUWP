@@ -30,6 +30,9 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   void OpenURL(const WCHAR* sURL);
   void InitReader(const WCHAR* sURL);
 
+  // callback
+  void positionChanged(LONGLONG newPosition);
+
   // Playback
   void PlayPauseVideo();
 

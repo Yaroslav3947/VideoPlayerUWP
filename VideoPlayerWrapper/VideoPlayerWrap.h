@@ -20,8 +20,10 @@ namespace VideoPlayerWrapper {
   void Unmute() { m_videoPlayer->Unmute(); };
   void ChangeVolume(double volume) { m_videoPlayer->ChangeVolume(volume); };
   bool GetIsMuted() { return m_videoPlayer->GetIsMuted(); }
-  
 
+  // Event handler
+  void OnPositionChanged(long long timestamp);
+  
  private
  protected:
   void CreateDeviceIndependentResources();

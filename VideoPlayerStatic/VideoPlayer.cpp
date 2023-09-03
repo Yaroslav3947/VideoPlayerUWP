@@ -99,6 +99,8 @@ void VideoPlayer::InitReader(const WCHAR *sURL) {
                                                    m_reader.GetAddressOf()));
 }
 
+void VideoPlayer::positionChanged(LONGLONG newPosition) {}
+
 void VideoPlayer::InitAudioAndVideoTypes() {
   ComPtr<IMFMediaType> pAudioType;
   winrt::check_hresult(MFCreateMediaType(&pAudioType));
@@ -207,6 +209,8 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
     bitmap =
         m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
     m_dxhelper->RenderBitmapOnWindow(bitmap);
+
+    positionChanged(llTimestamp / 100);
 
   } else if (dwStreamIndex == (DWORD)StreamIndex::audioStreamIndex) {
     auto soundData = m_mediaReader->LoadMedia(pSample);

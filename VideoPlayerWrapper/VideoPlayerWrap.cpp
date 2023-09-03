@@ -19,11 +19,17 @@ using namespace Windows::System::Threading;
 VideoPlayerWrap::VideoPlayerWrap()
     : m_width(1600.0f), m_height(900.0f) {  ////TODO: get rid of magic numbers
 
+    ////TODO: connect signal VideoPlayerWrap::OnPositionChanged
+
   CreateDeviceIndependentResources();
   CreateDeviceResources();
   CreateSizeDependentResources();
 
   m_videoPlayer = new VideoPlayer(m_swapChain.Get());
+}
+
+void VideoPlayerWrap::OnPositionChanged(long long timestamp) {
+    ////TODO: implement signal
 }
 
 void VideoPlayerWrap::CreateDeviceIndependentResources() {
