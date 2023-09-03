@@ -7,6 +7,8 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using VideoPlayerWrapper;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -32,7 +34,9 @@ namespace VideoPlayerUWP {
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
-            mySwapChainPanel.OpenURL("VideoMusk30fps.mp4");
+            videoPlayer.OpenURL("VideoMusk30fps.mp4");
+
+            UpdateDurationInfo(20000000);
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e) {
@@ -43,15 +47,21 @@ namespace VideoPlayerUWP {
             double newHeight = e.Size.Height - 40; ////TODO: get the actual size of bottom panel
 
 
-            mySwapChainPanel.ResizeSwapChainPanel(newWidth,newHeight);
+            videoPlayer.ResizeSwapChainPanel(newWidth,newHeight);
         }
 
         private void PlayPauseButton_Click(object sender,RoutedEventArgs e) {
-
+            videoPlayer.PlayPauseVideo();
         }
 
         private void MuteButton_Click_(object sender,RoutedEventArgs e) {
-
+            if(videoPlayer.GetIsMuted()) {
+                videoPlayer.Unmute();
+                ////TODO: change the icon
+            } else {
+                videoPlayer.Mute();
+                ////TODO: change the icon
+            }
         }
 
         private void videoSlider_ValueChanged(object sender,RangeBaseValueChangedEventArgs e) {
@@ -59,6 +69,38 @@ namespace VideoPlayerUWP {
         }
 
         private void VideoTimeTextBlock_SelectionChanged(object sender,RoutedEventArgs e) {
+
+        }
+
+        public void UpdateDurationInfo(long currentPosition) {
+            long duration = videoPlayer.GetDuration();
+
+            TimeSpan currentTime = TimeSpan.FromMilliseconds(currentPosition / 10000);
+            TimeSpan totalTime = TimeSpan.FromMilliseconds(duration / 10000);
+
+            string format = "hh\\:mm\\:ss";
+
+            string currentTimeStr = currentTime.ToString(format);
+            string totalTimeStr = totalTime.ToString(format);
+
+            string tStr = currentTimeStr + " / " + totalTimeStr;
+
+            VideoTimeTextBlock.Text = tStr;
+        }
+
+        private async void OpenMenuItem_Click(object sender,RoutedEventArgs e) {
+            FileOpenPicker filePicker = new FileOpenPicker();
+            filePicker.ViewMode = PickerViewMode.List;
+            filePicker.SuggestedStartLocation = PickerLocationId.VideosLibrary;
+            filePicker.FileTypeFilter.Add(".mp4");
+
+            StorageFile file = await filePicker.PickSingleFileAsync();
+            if(file != null) {
+                // Handle the selected MP4 file here
+                // You can signal to it or perform any other actions
+                string selectedFilePath = file.Path;
+                // Signal or process the selected file
+            }
 
         }
     }

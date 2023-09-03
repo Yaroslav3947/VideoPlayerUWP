@@ -16,6 +16,11 @@ namespace VideoPlayerWrapper {
   long long GetDuration();
   bool GetIsPaused() { return m_videoPlayer->GetIsPaused(); }
   void ResizeSwapChainPanel(double width, double height);
+  void Mute() { m_videoPlayer->Mute(); };
+  void Unmute() { m_videoPlayer->Unmute(); };
+  void ChangeVolume(double volume) { m_videoPlayer->ChangeVolume(volume); };
+  bool GetIsMuted() { return m_videoPlayer->GetIsMuted(); }
+  
 
  private
  protected:

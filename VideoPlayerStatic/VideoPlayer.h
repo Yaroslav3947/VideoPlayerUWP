@@ -38,7 +38,15 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   LONGLONG GetDuration();
   inline bool GetIsPaused() const { return m_isPaused; }
 
-  SoundEffect* GetSoundEffect() const { return m_soundEffect.get(); }
+
+  bool GetIsMuted() const { return m_soundEffect->IsMute(); }
+  void Mute() { m_soundEffect->Mute(); }
+  void Unmute() { m_soundEffect->Unmute(); }
+  void ChangeVolume(const float& volume) {
+    m_soundEffect->ChangeVolume(volume);
+  }
+
+  //SoundEffect* GetSoundEffect() const { return m_soundEffect.get(); }
   DXHelper* GetDxHelper() const { return m_dxhelper.get(); }
 
  private:
