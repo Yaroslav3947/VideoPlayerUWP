@@ -17,19 +17,21 @@ using namespace Windows::Storage::Streams;
 using namespace Windows::System::Threading;
 
 VideoPlayerWrap::VideoPlayerWrap()
-    : m_width(1600.0f), m_height(900.0f) {  ////TODO: get rid of magic numbers
-
-    ////TODO: connect signal VideoPlayerWrap::OnPositionChanged
+    : m_width(1920.0f), m_height(1080.0f) {  ////TODO: get rid of magic numbers
 
   CreateDeviceIndependentResources();
   CreateDeviceResources();
   CreateSizeDependentResources();
 
-  m_videoPlayer = new VideoPlayer(m_swapChain.Get());
+  NativePositionChangedCallback ^ callbackDelegate =
+      ref new NativePositionChangedCallback(
+          this, &VideoPlayerWrap::NativePositionChanged);
+
+  m_videoPlayer = new VideoPlayer(m_swapChain.Get(), callbackDelegate);
 }
 
-void VideoPlayerWrap::OnPositionChanged(long long timestamp) {
-    ////TODO: implement signal
+void VideoPlayerWrap::NativePositionChanged(long long newVideoPlayerPosition) {
+  VideoPlayerPositionChanged(this, newVideoPlayerPosition);
 }
 
 void VideoPlayerWrap::CreateDeviceIndependentResources() {
@@ -120,8 +122,6 @@ void VideoPlayerWrap::CreateSizeDependentResources() {
           CallbackContext::Any));
 }
 
-VideoPlayerWrap::~VideoPlayerWrap() {}
-
 void VideoPlayerWrap::OnDeviceLost() {
   m_loadingComplete = false;
 
@@ -137,13 +137,13 @@ void VideoPlayerWrap::OnDeviceLost() {
   CreateSizeDependentResources();
 }
 
-void VideoPlayerWrap::PlayPauseVideo() { m_videoPlayer->PlayPauseVideo(); }
-
 void VideoPlayerWrap::OpenURL(Platform::String ^ sURL) {
   const WCHAR* url = sURL->Data();
 
   m_videoPlayer->OpenURL(url);
 }
+
+void VideoPlayerWrap::PlayPauseVideo() { m_videoPlayer->PlayPauseVideo(); }
 
 void VideoPlayerWrap::SetPosition(long long position) {
   m_videoPlayer->SetPosition(position);
@@ -153,6 +153,16 @@ long long VideoPlayerWrap::GetDuration() {
   return m_videoPlayer->GetDuration();
 }
 
-void VideoPlayerWrap::ResizeSwapChainPanel(double width, double height) {
+void VideoPlayerWrap::Mute() { m_videoPlayer->Mute(); }
+void VideoPlayerWrap::Unmute() { m_videoPlayer->Unmute(); }
+bool VideoPlayerWrap::GetIsMuted() { return m_videoPlayer->GetIsMuted(); }
+bool VideoPlayerWrap::GetIsPaused() { return m_videoPlayer->GetIsPaused(); }
+void VideoPlayerWrap::ChangeVolume(double volume) {
+  m_videoPlayer->ChangeVolume(volume);
+}
+
+void VideoPlayerWrap::ResizeSwapChainPanel(int width, int height) {
   m_videoPlayer->GetDxHelper()->ResizeRenderTarget(width, height);
 }
+
+VideoPlayerWrap::~VideoPlayerWrap() {}

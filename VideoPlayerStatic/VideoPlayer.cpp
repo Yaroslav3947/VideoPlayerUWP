@@ -2,11 +2,13 @@
 
 #include "Include.h"
 
-VideoPlayer::VideoPlayer(ComPtr<IDXGISwapChain1> swapChain)
+VideoPlayer::VideoPlayer(ComPtr<IDXGISwapChain1> swapChain,
+                         std::function<void(long long)> positionChangedCallback)
     : m_nRefCount(1),
       m_reader(nullptr),
       m_mediaReader(nullptr),
-      m_soundEffect(nullptr) {
+      m_soundEffect(nullptr),
+      m_positionChangedCallback(positionChangedCallback) {
   Init(swapChain);
 }
 
@@ -99,8 +101,6 @@ void VideoPlayer::InitReader(const WCHAR *sURL) {
                                                    m_reader.GetAddressOf()));
 }
 
-void VideoPlayer::positionChanged(LONGLONG newPosition) {}
-
 void VideoPlayer::InitAudioAndVideoTypes() {
   ComPtr<IMFMediaType> pAudioType;
   winrt::check_hresult(MFCreateMediaType(&pAudioType));
@@ -192,6 +192,7 @@ float VideoPlayer::GetFPS() {
 HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
                                   DWORD dwStreamFlags, LONGLONG llTimestamp,
                                   IMFSample *pSample) {
+
   std::lock_guard<std::mutex> lock(GetDxHelper()->GetResizeMtx());
 
   if (m_isPaused) {
@@ -210,7 +211,7 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
         m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
     m_dxhelper->RenderBitmapOnWindow(bitmap);
 
-    positionChanged(llTimestamp / 100);
+    m_positionChangedCallback(llTimestamp / 100);
 
   } else if (dwStreamIndex == (DWORD)StreamIndex::audioStreamIndex) {
     auto soundData = m_mediaReader->LoadMedia(pSample);
@@ -221,6 +222,13 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
                                             NULL, NULL, NULL, NULL));
 
   return S_OK;
+}
+
+bool VideoPlayer::GetIsMuted() const { return m_soundEffect->IsMute(); }
+void VideoPlayer::Mute() { m_soundEffect->Mute(); }
+void VideoPlayer::Unmute() { m_soundEffect->Unmute(); }
+void VideoPlayer::ChangeVolume(const float &volume) {
+  m_soundEffect->ChangeVolume(volume);
 }
 
 VideoPlayer::~VideoPlayer() { MFShutdown(); }

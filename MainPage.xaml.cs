@@ -28,12 +28,30 @@ namespace VideoPlayerUWP {
     public sealed partial class MainPage : Page {
         public MainPage() {
             this.InitializeComponent();
+            ConnectSignals();
+        }
 
-            Window.Current.SizeChanged += Window_SizeChanged;
+        private void ConnectSignals() {
+            Window.Current.SizeChanged += WindowSizeChanged;
 
+            videoPlayer.VideoPlayerPositionChanged += OnVideoPlayerPositionChanged;
+
+            ConnectSliderSignals();
+        }
+
+        private void ConnectSliderSignals() {
             videoSlider.ValueChanged += OnSliderMoved;
             videoSlider.PointerPressed += OnSliderPressed;
             videoSlider.PointerReleased += OnSliderReleased;
+        }
+
+        private void OnVideoPlayerPositionChanged(VideoPlayerWrap sender,long newVideoPlayerPosition) {
+            //Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,() => {
+            //    videoSlider.Value = newVideoPlayerPosition;
+            //    UpdateDurationInfo(newVideoPlayerPosition * 100);
+            //});
+
+            ////TODO: think about async/await
         }
 
         private void OnSliderReleased(object sender,PointerRoutedEventArgs e) {
@@ -52,16 +70,11 @@ namespace VideoPlayerUWP {
         }
 
         private void OnSliderMoved(object sender,RangeBaseValueChangedEventArgs e) {
-            long sliderValue = (long)e.NewValue;
+            long newSliderValue = (long)e.NewValue;
 
             //Debug.WriteLine("Slider moved" + sliderValue);
 
-            videoPlayer.SetPosition(sliderValue * 100);
-        }
-        private void OnPositionChanged(long newPosition) {
-            videoSlider.Value = newPosition;
-
-            UpdateDurationInfo(newPosition * 100);
+            videoPlayer.SetPosition(newSliderValue * 100);
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
@@ -69,26 +82,26 @@ namespace VideoPlayerUWP {
             //videoPlayer.OpenURL("VideoMusk30fps.mp4");
             videoPlayer.OpenURL("SampleVideo25fps.mp4");
 
+            SetSlider();
+        }
+
+        private void SetSlider() {
             long maxSliderValue = videoPlayer.GetDuration() / 100;
 
             videoSlider.Minimum = 0;
             videoSlider.Maximum = maxSliderValue;
-
-            //UpdateDurationInfo(20000000);
         }
 
-        protected override void OnNavigatedFrom(NavigationEventArgs e) {
-        }
+        private void WindowSizeChanged(object sender,WindowSizeChangedEventArgs e) {
+            double newVideoGridWidth = videoGrid.ActualWidth;
+            double newVideoGridHeight = videoGrid.ActualHeight;
 
-        private void Window_SizeChanged(object sender,WindowSizeChangedEventArgs e) {
-            double newWidth = videoGrid.ActualWidth;
-            double newHeight = videoGrid.ActualHeight;
-
-            videoPlayer.ResizeSwapChainPanel(newWidth,newHeight);
+            videoPlayer.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight);
         }
 
         private void PlayPauseButton_Click(object sender,RoutedEventArgs e) {
             videoPlayer.PlayPauseVideo();
+            ////TODO: change the icon
         }
 
         private void MuteButton_Click_(object sender,RoutedEventArgs e) {
@@ -102,19 +115,19 @@ namespace VideoPlayerUWP {
         }
 
         public void UpdateDurationInfo(long currentPosition) {
-            long duration = videoPlayer.GetDuration();
+            long videoDuration = videoPlayer.GetDuration();
 
             TimeSpan currentTime = TimeSpan.FromMilliseconds(currentPosition / 10000);
-            TimeSpan totalTime = TimeSpan.FromMilliseconds(duration / 10000);
+            TimeSpan totalTime = TimeSpan.FromMilliseconds(videoDuration / 10000);
 
             string format = "hh\\:mm\\:ss";
 
             string currentTimeStr = currentTime.ToString(format);
             string totalTimeStr = totalTime.ToString(format);
 
-            string tStr = currentTimeStr + " / " + totalTimeStr;
+            string resultString = currentTimeStr + " / " + totalTimeStr;
 
-            VideoTimeTextBlock.Text = tStr;
+            VideoTimeTextBlock.Text = resultString;
         }
 
         private async void OpenMenuItem_Click(object sender,RoutedEventArgs e) {
@@ -123,11 +136,19 @@ namespace VideoPlayerUWP {
             filePicker.SuggestedStartLocation = PickerLocationId.VideosLibrary;
             filePicker.FileTypeFilter.Add(".mp4");
 
-            StorageFile file = await filePicker.PickSingleFileAsync();
-            if(file != null) {
-                string selectedFilePath = file.Path;
-            }
+            try {
+                StorageFile file = await filePicker.PickSingleFileAsync();
+                if(file != null) {
+                    string selectedFilePath = file.Path;
+                    ////TODO: open file and start a videoPlayer
+                    /// Think about how to handle the case 
+                    /// when the videoPlayer is already playing a video
 
+                }
+            }
+            catch(Exception ex) {
+                Debug.WriteLine($"Error opening file : {ex.Message}");
+            }
         }
     }
 }
