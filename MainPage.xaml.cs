@@ -7,6 +7,8 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using VideoPlayerWrapper;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -26,40 +28,127 @@ namespace VideoPlayerUWP {
     public sealed partial class MainPage : Page {
         public MainPage() {
             this.InitializeComponent();
+            ConnectSignals();
+        }
 
-            Window.Current.SizeChanged += Window_SizeChanged;
+        private void ConnectSignals() {
+            Window.Current.SizeChanged += WindowSizeChanged;
+
+            videoPlayer.VideoPlayerPositionChanged += OnVideoPlayerPositionChanged;
+
+            ConnectSliderSignals();
+        }
+
+        private void ConnectSliderSignals() {
+            videoSlider.ValueChanged += OnSliderMoved;
+            videoSlider.PointerPressed += OnSliderPressed;
+            videoSlider.PointerReleased += OnSliderReleased;
+        }
+
+        private void OnVideoPlayerPositionChanged(VideoPlayerWrap sender,long newVideoPlayerPosition) {
+            //Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,() => {
+            //    videoSlider.Value = newVideoPlayerPosition;
+            //    UpdateDurationInfo(newVideoPlayerPosition * 100);
+            //});
+
+            ////TODO: think about async/await
+        }
+
+        private void OnSliderReleased(object sender,PointerRoutedEventArgs e) {
+            Debug.WriteLine("Slider released");
+            if(videoPlayer.GetIsPaused()) {
+                videoPlayer.PlayPauseVideo();
+                ////TODO: change the icon to pause
+            }
+        }
+
+        private void OnSliderPressed(object sender,PointerRoutedEventArgs e) {
+            Debug.WriteLine("Slider pressed");
+            if(!videoPlayer.GetIsPaused()) {
+                videoPlayer.PlayPauseVideo();
+            }
+        }
+
+        private void OnSliderMoved(object sender,RangeBaseValueChangedEventArgs e) {
+            long newSliderValue = (long)e.NewValue;
+
+            //Debug.WriteLine("Slider moved" + sliderValue);
+
+            videoPlayer.SetPosition(newSliderValue * 100);
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
-            mySwapChainPanel.OpenURL("VideoMusk30fps.mp4");
+            //videoPlayer.OpenURL("VideoMusk30fps.mp4");
+            videoPlayer.OpenURL("SampleVideo25fps.mp4");
+
+            SetSlider();
         }
 
-        protected override void OnNavigatedFrom(NavigationEventArgs e) {
+        private void SetSlider() {
+            long maxSliderValue = videoPlayer.GetDuration() / 100;
+
+            videoSlider.Minimum = 0;
+            videoSlider.Maximum = maxSliderValue;
         }
 
-        private void Window_SizeChanged(object sender,WindowSizeChangedEventArgs e) {
-            double newWidth = e.Size.Width;
-            double newHeight = e.Size.Height - 40; ////TODO: get the actual size of bottom panel
+        private void WindowSizeChanged(object sender,WindowSizeChangedEventArgs e) {
+            double newVideoGridWidth = videoGrid.ActualWidth;
+            double newVideoGridHeight = videoGrid.ActualHeight;
 
-
-            mySwapChainPanel.ResizeSwapChainPanel(newWidth,newHeight);
+            videoPlayer.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight);
         }
 
         private void PlayPauseButton_Click(object sender,RoutedEventArgs e) {
-
+            videoPlayer.PlayPauseVideo();
+            ////TODO: change the icon
         }
 
         private void MuteButton_Click_(object sender,RoutedEventArgs e) {
-
+            if(videoPlayer.GetIsMuted()) {
+                videoPlayer.Unmute();
+                ////TODO: change the icon
+            } else {
+                videoPlayer.Mute();
+                ////TODO: change the icon
+            }
         }
 
-        private void videoSlider_ValueChanged(object sender,RangeBaseValueChangedEventArgs e) {
+        public void UpdateDurationInfo(long currentPosition) {
+            long videoDuration = videoPlayer.GetDuration();
 
+            TimeSpan currentTime = TimeSpan.FromMilliseconds(currentPosition / 10000);
+            TimeSpan totalTime = TimeSpan.FromMilliseconds(videoDuration / 10000);
+
+            string format = "hh\\:mm\\:ss";
+
+            string currentTimeStr = currentTime.ToString(format);
+            string totalTimeStr = totalTime.ToString(format);
+
+            string resultString = currentTimeStr + " / " + totalTimeStr;
+
+            VideoTimeTextBlock.Text = resultString;
         }
 
-        private void VideoTimeTextBlock_SelectionChanged(object sender,RoutedEventArgs e) {
+        private async void OpenMenuItem_Click(object sender,RoutedEventArgs e) {
+            FileOpenPicker filePicker = new FileOpenPicker();
+            filePicker.ViewMode = PickerViewMode.List;
+            filePicker.SuggestedStartLocation = PickerLocationId.VideosLibrary;
+            filePicker.FileTypeFilter.Add(".mp4");
 
+            try {
+                StorageFile file = await filePicker.PickSingleFileAsync();
+                if(file != null) {
+                    string selectedFilePath = file.Path;
+                    ////TODO: open file and start a videoPlayer
+                    /// Think about how to handle the case 
+                    /// when the videoPlayer is already playing a video
+
+                }
+            }
+            catch(Exception ex) {
+                Debug.WriteLine($"Error opening file : {ex.Message}");
+            }
         }
     }
 }

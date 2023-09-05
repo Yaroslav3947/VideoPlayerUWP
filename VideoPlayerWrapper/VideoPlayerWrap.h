@@ -2,35 +2,57 @@
 
 #include "pch.h"
 
-#include "../VideoPlayerStatic/VideoPlayer.h"
+#include "../VideoPlayerStatic/VideoPlayer.h" ////TODO: work out pathing
 
 namespace VideoPlayerWrapper {
+    ref class VideoPlayerWrap;
+public delegate void VideoPlayerPositionChangedHandler(VideoPlayerWrap ^sender, long long timestamp);
+
 [Windows::Foundation::Metadata::WebHostHidden] public ref class VideoPlayerWrap sealed
     : public Windows::UI::Xaml::Controls::SwapChainPanel {
  public:
   VideoPlayerWrap();
-
-  void PlayPauseVideo();
   void OpenURL(Platform::String ^ sURL);
-  void SetPosition(Windows::Foundation::TimeSpan position);
+
+  // Playback methods
+  void PlayPauseVideo();
   long long GetDuration();
-  bool GetIsPaused() { return m_videoPlayer->GetIsPaused(); }
-  void ResizeSwapChainPanel(double width, double height);
+  void SetPosition(long long position);
+
+  // Audio methods
+  void Mute();
+  void Unmute();
+  bool GetIsMuted();
+  bool GetIsPaused();
+  void ChangeVolume(double volume);
+
+  // SwapChainPanel event handlers
+  void ResizeSwapChainPanel(int width, int height);
+
+ public:
+  event VideoPlayerPositionChangedHandler ^ VideoPlayerPositionChanged;
+
+  // Event handler
+  void NativePositionChanged(long long newPosition);
+
+private:
+  delegate void NativePositionChangedCallback(long long newPosition);
 
  private
  protected:
-  void CreateDeviceIndependentResources();
+     // DirectX Core Objects
   void CreateDeviceResources();
   void CreateSizeDependentResources();
+  void CreateDeviceIndependentResources();
 
   void OnDeviceLost();
 
+  ComPtr<ID2D1Device> m_d2dDevice;
   ComPtr<IDXGIOutput> m_dxgiOutput;
   ComPtr<ID3D11Device1> m_d3dDevice;
-  ComPtr<ID3D11DeviceContext1> m_d3dContext;
-  ComPtr<IDXGISwapChain1> m_swapChain;
   ComPtr<ID2D1Factory2> m_d2dFactory;
-  ComPtr<ID2D1Device> m_d2dDevice;
+  ComPtr<IDXGISwapChain1> m_swapChain;
+  ComPtr<ID3D11DeviceContext1> m_d3dContext;
 
   Concurrency::critical_section m_criticalSection;
 
@@ -44,5 +66,4 @@ namespace VideoPlayerWrapper {
 
   ~VideoPlayerWrap();
 };
-
 }  // namespace VideoPlayerWrapper

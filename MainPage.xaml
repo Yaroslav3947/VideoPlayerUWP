@@ -9,25 +9,53 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+
+    <!-- File Menu -->
+    <Page.TopAppBar>
+        <CommandBar>
+            <AppBarButton x:Name="fileMenu" Icon="Folder" Label="File">
+                <AppBarButton.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem x:Name="openMenuItem" Text="Open" Click="OpenMenuItem_Click"/>
+                    </MenuFlyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+        </CommandBar>
+    </Page.TopAppBar>
+
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
+            <RowDefinition />
+
+            <RowDefinition Height="0" />
+
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <graphics:VideoPlayerWrap x:Name="mySwapChainPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0" />
+        <Grid x:Name="videoGrid" Grid.Row="0" Background="Black">
+            <graphics:VideoPlayerWrap x:Name="videoPlayer" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        </Grid>
 
-        <Grid Grid.Row="1">
+        <!-- Control Panel Grid -->
+        <Grid x:Name="controlPanel" Grid.Row="2" Background="Gray">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="1797*"/>
             </Grid.ColumnDefinitions>
 
-            <Button x:Name="PlayPauseButton" Content="Play" Margin="5" Click="PlayPauseButton_Click"/>
-            <Button x:Name="MuteButton" Content="Mute" Grid.Column="1" Click="MuteButton_Click_"/>
+            <Button x:Name="PlayPauseButton" Content="Play" Click="PlayPauseButton_Click" Height="32" Width="46" HorizontalAlignment="Center"/>
+            <Button x:Name="MuteButton" Content="Mute" Grid.Column="2" Click="MuteButton_Click_" Height="32" Width="53" HorizontalAlignment="Center"/>
 
-            <Slider x:Name="videoSlider" Margin="178,5,-86,5" Grid.Column="1" ValueChanged="videoSlider_ValueChanged"/>
-            <TextBlock x:Name="VideoTimeTextBlock" Grid.Column="1" HorizontalAlignment="Left" Margin="58,0,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Center" Height="32" Width="115" SelectionChanged="VideoTimeTextBlock_SelectionChanged"/>
+            <Slider x:Name="videoSlider" Margin="142,5,3,5" Grid.Column="3"  RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False" d:LayoutRounding="Auto" ManipulationMode="All">
+                <Slider.RenderTransform>
+                    <CompositeTransform SkewY="-0.031" TranslateY="0.499"/>
+                </Slider.RenderTransform>
+            </Slider>
+            <TextBlock x:Name="VideoTimeTextBlock" Grid.Column="3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2,0,0,0" TextAlignment="Center" TextWrapping="Wrap" Text="" Height="38" Width="134" FontSize="11"/>
+
         </Grid>
     </Grid>
 </Page>
+

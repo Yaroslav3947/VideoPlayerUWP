@@ -16,5 +16,6 @@
 #include <xaudio2.h>
 
 #include <mutex>
+#include <functional>
 
 using Microsoft::WRL::ComPtr;
