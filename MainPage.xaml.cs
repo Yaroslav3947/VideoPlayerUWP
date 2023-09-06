@@ -11,6 +11,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.System;
 using Windows.UI.Core;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -46,12 +47,13 @@ namespace VideoPlayerUWP {
         }
 
         private void OnVideoPlayerPositionChanged(VideoPlayerWrap sender,long newVideoPlayerPosition) {
-            //Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,() => {
-            //    videoSlider.Value = newVideoPlayerPosition;
-            //    UpdateDurationInfo(newVideoPlayerPosition * 100);
-            //});
+            Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() => {
+                //videoSlider.Value = newVideoPlayerPosition;
+                UpdateDurationInfo(newVideoPlayerPosition * 100);
+            });
 
-            ////TODO: think about async/await
+            ////TODO: work out updating the slider
+
         }
 
         private void OnSliderReleased(object sender,PointerRoutedEventArgs e) {
@@ -79,10 +81,15 @@ namespace VideoPlayerUWP {
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
-            //videoPlayer.OpenURL("VideoMusk30fps.mp4");
-            videoPlayer.OpenURL("SampleVideo25fps.mp4");
 
-            SetSlider();
+
+            //videoPlayer.OpenURL("VideoMusk30fps.mp4");
+            //videoPlayer.OpenURL("SampleVideo25fps.mp4");
+
+            //SetSlider();
+
+
+            //videoPlayer.ResizeSwapChainPanel(1280,720);
         }
 
         private void SetSlider() {
@@ -96,7 +103,13 @@ namespace VideoPlayerUWP {
             double newVideoGridWidth = videoGrid.ActualWidth;
             double newVideoGridHeight = videoGrid.ActualHeight;
 
-            videoPlayer.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight);
+            if(newVideoGridHeight > 0 && newVideoGridWidth > 0) {
+                if(!videoPlayer.GetIsPaused()) {
+                    videoPlayer?.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight,false);
+                } else {
+                    videoPlayer?.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight,true);
+                }
+            }
         }
 
         private void PlayPauseButton_Click(object sender,RoutedEventArgs e) {
@@ -144,7 +157,13 @@ namespace VideoPlayerUWP {
                     /// Think about how to handle the case 
                     /// when the videoPlayer is already playing a video
 
+                    ////TODO: add broadFileAccess capability
+
+                    videoPlayer.OpenURL("SampleVideo25fps.mp4");
+                    SetSlider();
+
                 }
+
             }
             catch(Exception ex) {
                 Debug.WriteLine($"Error opening file : {ex.Message}");

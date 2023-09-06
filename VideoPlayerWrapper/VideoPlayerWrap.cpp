@@ -23,15 +23,10 @@ VideoPlayerWrap::VideoPlayerWrap()
   CreateDeviceResources();
   CreateSizeDependentResources();
 
-  NativePositionChangedCallback ^ callbackDelegate =
-      ref new NativePositionChangedCallback(
-          this, &VideoPlayerWrap::NativePositionChanged);
-
-  m_videoPlayer = new VideoPlayer(m_swapChain.Get(), callbackDelegate);
-}
-
-void VideoPlayerWrap::NativePositionChanged(long long newVideoPlayerPosition) {
-  VideoPlayerPositionChanged(this, newVideoPlayerPosition);
+  m_videoPlayer = new VideoPlayer(
+      m_swapChain.Get(), [this](long long newVideoPlayerPosition) {
+        VideoPlayerPositionChanged(this, newVideoPlayerPosition);
+      });
 }
 
 void VideoPlayerWrap::CreateDeviceIndependentResources() {
@@ -161,8 +156,9 @@ void VideoPlayerWrap::ChangeVolume(double volume) {
   m_videoPlayer->ChangeVolume(volume);
 }
 
-void VideoPlayerWrap::ResizeSwapChainPanel(int width, int height) {
-  m_videoPlayer->GetDxHelper()->ResizeRenderTarget(width, height);
+void VideoPlayerWrap::ResizeSwapChainPanel(int width, int height,
+                                           bool isPaused) {
+  m_videoPlayer->GetDxHelper()->ResizeRenderTarget(width, height, isPaused);
 }
 
-VideoPlayerWrap::~VideoPlayerWrap() {}
+VideoPlayerWrap::~VideoPlayerWrap() { delete m_videoPlayer; }
