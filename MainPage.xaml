@@ -25,11 +25,11 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition />
-
-            <RowDefinition Height="0" />
+            <RowDefinition Height="*"/>
 
             <RowDefinition Height="Auto" />
+
+            <!--<RowDefinition Height="Auto" />-->
         </Grid.RowDefinitions>
 
         <Grid x:Name="videoGrid" Grid.Row="0" Background="Black">
@@ -37,7 +37,7 @@
         </Grid>
 
         <!-- Control Panel Grid -->
-        <Grid x:Name="controlPanel" Grid.Row="2" Background="Gray">
+        <Grid x:Name="controlPanel" Grid.Row="1" Background="Gray">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50" />
                 <ColumnDefinition Width="5"/>

@@ -6,7 +6,9 @@
 
 namespace VideoPlayerWrapper {
     ref class VideoPlayerWrap;
-public delegate void VideoPlayerPositionChangedHandler(VideoPlayerWrap ^sender, long long timestamp);
+public
+delegate void VideoPlayerPositionChangedHandler(VideoPlayerWrap ^ sender,
+                                                long long newVideoPlayerPosition);
 
 [Windows::Foundation::Metadata::WebHostHidden] public ref class VideoPlayerWrap sealed
     : public Windows::UI::Xaml::Controls::SwapChainPanel {
@@ -29,14 +31,7 @@ public delegate void VideoPlayerPositionChangedHandler(VideoPlayerWrap ^sender, 
   // SwapChainPanel event handlers
   void ResizeSwapChainPanel(int width, int height);
 
- public:
   event VideoPlayerPositionChangedHandler ^ VideoPlayerPositionChanged;
-
-  // Event handler
-  void NativePositionChanged(long long newPosition);
-
-private:
-  delegate void NativePositionChangedCallback(long long newPosition);
 
  private
  protected:
