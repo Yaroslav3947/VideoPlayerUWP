@@ -156,8 +156,9 @@ void VideoPlayerWrap::ChangeVolume(double volume) {
   m_videoPlayer->ChangeVolume(volume);
 }
 
-void VideoPlayerWrap::ResizeSwapChainPanel(int width, int height) {
-  m_videoPlayer->GetDxHelper()->ResizeRenderTarget(width, height);
+void VideoPlayerWrap::ResizeSwapChainPanel(int width, int height,
+                                           bool isPaused) {
+  m_videoPlayer->GetDxHelper()->ResizeRenderTarget(width, height, isPaused);
 }
 
 VideoPlayerWrap::~VideoPlayerWrap() { delete m_videoPlayer; }

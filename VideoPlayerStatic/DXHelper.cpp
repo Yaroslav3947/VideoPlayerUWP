@@ -47,8 +47,9 @@ ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(
   return bitmap;
 }
 
-void DXHelper::ResizeRenderTarget(const UINT32& width, const UINT32& height) {
+void DXHelper::ResizeRenderTarget(const UINT32& width, const UINT32& height, bool isPaused) {
   std::lock_guard<std::mutex> lock(m_resize_mtx);
+
 
   if (m_renderTarget) {
     m_renderTarget.Reset();
@@ -68,9 +69,16 @@ void DXHelper::ResizeRenderTarget(const UINT32& width, const UINT32& height) {
 
   winrt::check_hresult(m_factory->CreateDxgiSurfaceRenderTarget(
       dxgiBackbuffer.Get(), &renderTargetProps, m_renderTarget.GetAddressOf()));
+
+  if (isPaused) {
+    ComPtr<ID2D1Bitmap> lastBitmap = m_lastBitmap;
+    RenderBitmapOnWindow(m_lastBitmap);
+  }
 }
 
 void DXHelper::RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap) {
+  m_lastBitmap = pBitmap;
+
   m_renderTarget->BeginDraw();
   m_renderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
   m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Black));

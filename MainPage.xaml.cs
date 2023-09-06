@@ -104,7 +104,11 @@ namespace VideoPlayerUWP {
             double newVideoGridHeight = videoGrid.ActualHeight;
 
             if(newVideoGridHeight > 0 && newVideoGridWidth > 0) {
-                videoPlayer?.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight);
+                if(!videoPlayer.GetIsPaused()) {
+                    videoPlayer?.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight,false);
+                } else {
+                    videoPlayer?.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight,true);
+                }
             }
         }
 

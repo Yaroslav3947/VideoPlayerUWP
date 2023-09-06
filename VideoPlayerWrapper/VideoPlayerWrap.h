@@ -29,7 +29,7 @@ delegate void VideoPlayerPositionChangedHandler(VideoPlayerWrap ^ sender,
   void ChangeVolume(double volume);
 
   // SwapChainPanel event handlers
-  void ResizeSwapChainPanel(int width, int height);
+  void ResizeSwapChainPanel(int width, int height, bool isPaused);
 
   event VideoPlayerPositionChangedHandler ^ VideoPlayerPositionChanged;
 
