@@ -2,7 +2,7 @@
 
 #include "pch.h"
 
-#include "../VideoPlayerStatic/VideoPlayer.h" ////TODO: work out pathing
+#include "../VideoPlayerWinrtStatic/VideoPlayer.h"
 
 namespace VideoPlayerWrapper {
     ref class VideoPlayerWrap;

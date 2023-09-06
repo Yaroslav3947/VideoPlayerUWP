@@ -1,4 +1,6 @@
+#include "pch.h"
 #include "MediaReader.h"
+
 
 std::vector<byte> MediaReader::LoadMedia(ComPtr<IMFSample> pSample) {
   ComPtr<IMFMediaBuffer> mediaBuffer;

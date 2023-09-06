@@ -1,4 +1,6 @@
+#include "pch.h"
 #include "Audio.h"
+
 
 Audio::Audio() : m_audioAvailable(false) {}
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Include.h"
+#include "pch.h"
 
 class DXHelper {
  public:
@@ -13,7 +13,8 @@ class DXHelper {
   ComPtr<ID2D1Bitmap> CreateBitmapFromVideoSample(IMFSample* pSample,
                                                   const UINT32& width,
                                                   const UINT32& height);
-  void ResizeRenderTarget(const UINT32& width, const UINT32& height, bool isPaused);
+  void ResizeRenderTarget(const UINT32& width, const UINT32& height,
+                          bool isPaused);
 
   std::mutex& GetResizeMtx() { return m_resize_mtx; }
 

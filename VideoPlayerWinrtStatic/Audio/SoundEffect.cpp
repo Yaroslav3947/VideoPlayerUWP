@@ -1,4 +1,6 @@
+#include "pch.h"
 #include "SoundEffect.h"
+
 
 SoundEffect::SoundEffect()
     : m_audioAvailable(false),

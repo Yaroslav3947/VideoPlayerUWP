@@ -1,4 +1,6 @@
+#include "pch.h"
 #include "DXHelper.h"
+
 
 DXHelper::DXHelper(ComPtr<IDXGISwapChain1> swapChain) : m_swapChain(swapChain) {
   Init();
@@ -47,9 +49,9 @@ ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(
   return bitmap;
 }
 
-void DXHelper::ResizeRenderTarget(const UINT32& width, const UINT32& height, bool isPaused) {
+void DXHelper::ResizeRenderTarget(const UINT32& width, const UINT32& height,
+                                  bool isPaused) {
   std::lock_guard<std::mutex> lock(m_resize_mtx);
-
 
   if (m_renderTarget) {
     m_renderTarget.Reset();
