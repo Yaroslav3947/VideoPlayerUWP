@@ -1,4 +1,10 @@
-#pragma once
+﻿#pragma once
+
+#include "targetver.h"
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 
 
 #include <Mfidl.h>
@@ -9,13 +15,14 @@
 #include <d3d11.h>
 #include <mfapi.h>
 #include <mfreadwrite.h>
-#include <propvarutil.h>
 #include <shlwapi.h>
 #include <winrt/base.h>
 #include <wrl/client.h>
 #include <xaudio2.h>
+#include <propsys.h>
 
 #include <mutex>
 #include <functional>
+#include <propvarutil.h>
 
 using Microsoft::WRL::ComPtr;

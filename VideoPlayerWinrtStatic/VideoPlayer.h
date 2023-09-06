@@ -1,22 +1,22 @@
 #pragma once
 
+#include "pch.h"
 #include "Audio/Audio.h"
 #include "Audio/MediaReader.h"
 #include "Audio/SoundEffect.h"
 #include "DXHelper.h"
-#include "Include.h"
 
- #pragma comment(lib, "mf.lib")
- #pragma comment(lib, "d2d1.lib")
- #pragma comment(lib, "dxgi.lib")
- #pragma comment(lib, "d3d11.lib")
- #pragma comment(lib, "winmm.lib")
- #pragma comment(lib, "dxguid.lib")
- #pragma comment(lib, "mfuuid.lib")
- #pragma comment(lib, "mfplat.lib")
- #pragma comment(lib, "Propsys.lib")
- #pragma comment(lib, "mfreadwrite.lib")
- #pragma comment(lib, "wmcodecdspuuid.lib") 
+#pragma comment(lib, "mf.lib")
+#pragma comment(lib, "d2d1.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "winmm.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "mfuuid.lib")
+#pragma comment(lib, "mfplat.lib")
+#pragma comment(lib, "propsys.lib")
+#pragma comment(lib, "mfreadwrite.lib")
+#pragma comment(lib, "wmcodecdspuuid.lib")
 
 ////TODO: use Pimpl to not include c++ inlcudes
 

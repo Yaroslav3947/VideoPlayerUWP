@@ -1,6 +1,8 @@
+#include "pch.h"
 #include "VideoPlayer.h"
 
-#include "Include.h"
+#include <propvarutil.h>
+
 
 VideoPlayer::VideoPlayer(ComPtr<IDXGISwapChain1> swapChain,
                          std::function<void(long long)> positionChangedCallback)
@@ -139,7 +141,8 @@ LONGLONG VideoPlayer::GetDuration() {
   HRESULT hr = m_reader->GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
                                                   MF_PD_DURATION, &var);
   if (SUCCEEDED(hr)) {
-    hr = PropVariantToInt64(var, &duration);
+    //hr = PropVariantToInt(var, &duration);
+    duration = var.hVal.QuadPart;
     PropVariantClear(&var);
   }
   return duration;
@@ -192,7 +195,6 @@ float VideoPlayer::GetFPS() {
 HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
                                   DWORD dwStreamFlags, LONGLONG llTimestamp,
                                   IMFSample *pSample) {
-
   std::lock_guard<std::mutex> lock(GetDxHelper()->GetResizeMtx());
 
   if (m_isPaused) {
