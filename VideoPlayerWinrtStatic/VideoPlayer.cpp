@@ -5,12 +5,14 @@
 
 
 VideoPlayer::VideoPlayer(ComPtr<IDXGISwapChain1> swapChain,
-                         std::function<void(long long)> positionChangedCallback)
+                         std::function<void(long long)> positionChangedCallback,
+                         std::function<void()> endOfStreamCallback)
     : m_nRefCount(1),
       m_reader(nullptr),
       m_mediaReader(nullptr),
       m_soundEffect(nullptr),
-      m_positionChangedCallback(positionChangedCallback) {
+      m_positionChangedCallback(positionChangedCallback),
+      m_endOfStreamCallback(endOfStreamCallback) {
   Init(swapChain);
 }
 
@@ -202,6 +204,7 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
   }
 
   if (dwStreamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
+      m_endOfStreamCallback();
     return S_OK;
   }
 

@@ -23,7 +23,8 @@
 class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
  public:
   VideoPlayer(ComPtr<IDXGISwapChain1> swapChain,
-              std::function<void(long long)> positionChangedCallback);
+              std::function<void(long long)> positionChangedCallback,
+              std::function<void()> endOfStreamCallback);
 
   virtual ~VideoPlayer();
 
@@ -89,6 +90,7 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   UINT32 m_height = 0;
 
   std::function<void(long long)> m_positionChangedCallback;
+  std::function<void()> m_endOfStreamCallback;
 
   enum class StreamIndex { audioStreamIndex = 0, videoStreamIndex = 1 };
 };

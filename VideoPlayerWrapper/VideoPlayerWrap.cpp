@@ -24,9 +24,11 @@ VideoPlayerWrap::VideoPlayerWrap()
   CreateSizeDependentResources();
 
   m_videoPlayer = new VideoPlayer(
-      m_swapChain.Get(), [this](long long newVideoPlayerPosition) {
+      m_swapChain.Get(),
+      [this](long long newVideoPlayerPosition) { // onPositionChanged callback
         VideoPlayerPositionChanged(this, newVideoPlayerPosition);
-      });
+      },
+      [this]() { VideoPlayerEndOfStream(this); }); // onEndOfStream callback
 }
 
 void VideoPlayerWrap::CreateDeviceIndependentResources() {

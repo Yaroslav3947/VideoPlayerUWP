@@ -36,6 +36,7 @@ namespace VideoPlayerUWP {
             Window.Current.SizeChanged += WindowSizeChanged;
 
             videoPlayer.VideoPlayerPositionChanged += OnVideoPlayerPositionChanged;
+            videoPlayer.VideoPlayerEndOfStream += OnVideoPlayerEndOfStream;
 
             ConnectSliderSignals();
         }
@@ -46,9 +47,15 @@ namespace VideoPlayerUWP {
             videoSlider.PointerReleased += OnSliderReleased;
         }
 
+        private void OnVideoPlayerEndOfStream(VideoPlayerWrap sender) {
+            // TODO: change the icon to play
+            videoPlayer.SetPosition(0);
+            videoPlayer.PlayPauseVideo();
+        }
+
         private void OnVideoPlayerPositionChanged(VideoPlayerWrap sender,long newVideoPlayerPosition) {
             Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() => {
-                videoSlider.Value = newVideoPlayerPosition;
+                //videoSlider.Value = newVideoPlayerPosition;
                 UpdateDurationInfo(newVideoPlayerPosition * 100);
             });
 
