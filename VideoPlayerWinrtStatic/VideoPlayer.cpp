@@ -153,6 +153,8 @@ LONGLONG VideoPlayer::GetDuration() {
 void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
   if (!m_reader) return;
 
+  PlayPauseVideo();
+
   PROPVARIANT var;
   PropVariantInit(&var);
   var.vt = VT_I8;
@@ -162,6 +164,8 @@ void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
   m_reader->SetCurrentPosition(GUID_NULL, var);
 
   PropVariantClear(&var);
+
+  PlayPauseVideo();
 }
 
 //-----------------------------------------------------------------------------

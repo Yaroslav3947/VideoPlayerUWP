@@ -30,6 +30,8 @@ namespace VideoPlayerUWP {
         public MainPage() {
             this.InitializeComponent();
             ConnectSignals();
+
+            controlPanel.Visibility = Visibility.Collapsed; // hide the control panel
         }
 
         private void ConnectSignals() {
@@ -43,41 +45,24 @@ namespace VideoPlayerUWP {
 
         private void ConnectSliderSignals() {
             videoSlider.ValueChanged += OnSliderMoved;
-            videoSlider.PointerPressed += OnSliderPressed;
-            videoSlider.PointerReleased += OnSliderReleased;
         }
 
         private void OnVideoPlayerEndOfStream(VideoPlayerWrap sender) {
             // TODO: change the icon to play
             videoPlayer.SetPosition(0);
             videoPlayer.PlayPauseVideo();
+            //videoSlider.Value = 0;
         }
 
         private void OnVideoPlayerPositionChanged(VideoPlayerWrap sender,long newVideoPlayerPosition) {
             Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() => {
-                //videoSlider.Value = newVideoPlayerPosition;
+                videoSlider.Value = newVideoPlayerPosition;
                 UpdateDurationInfo(newVideoPlayerPosition * 100);
             });
 
             ////TODO: work out updating the slider
 
         }
-
-        private void OnSliderReleased(object sender,PointerRoutedEventArgs e) {
-            Debug.WriteLine("Slider released");
-            if(videoPlayer.GetIsPaused()) {
-                videoPlayer.PlayPauseVideo();
-                ////TODO: change the icon to pause
-            }
-        }
-
-        private void OnSliderPressed(object sender,PointerRoutedEventArgs e) {
-            Debug.WriteLine("Slider pressed");
-            if(!videoPlayer.GetIsPaused()) {
-                videoPlayer.PlayPauseVideo();
-            }
-        }
-
         private void OnSliderMoved(object sender,RangeBaseValueChangedEventArgs e) {
             long newSliderValue = (long)e.NewValue;
 
@@ -85,17 +70,12 @@ namespace VideoPlayerUWP {
 
             videoSlider.Value = newSliderValue;
             videoPlayer.SetPosition(newSliderValue * 100);
+
+
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
-
-
-            //videoPlayer.OpenURL("VideoMusk30fps.mp4");
-            //videoPlayer.OpenURL("SampleVideo25fps.mp4");
-
-            //SetSlider();
-
 
             videoPlayer.ResizeSwapChainPanel(1280,720,false);
         }
@@ -167,11 +147,10 @@ namespace VideoPlayerUWP {
                     /// Think about how to handle the case 
                     /// when the videoPlayer is already playing a video
 
-                    ////TODO: add broadFileAccess capability
+                    controlPanel.Visibility = Visibility.Visible;
 
-                    videoPlayer.OpenURL("SampleVideo25fps.mp4");
+                    videoPlayer.OpenURL(selectedFilePath);
                     SetSlider();
-
                 }
 
             }
