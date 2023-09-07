@@ -48,7 +48,7 @@ namespace VideoPlayerUWP {
 
         private void OnVideoPlayerPositionChanged(VideoPlayerWrap sender,long newVideoPlayerPosition) {
             Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() => {
-                //videoSlider.Value = newVideoPlayerPosition;
+                videoSlider.Value = newVideoPlayerPosition;
                 UpdateDurationInfo(newVideoPlayerPosition * 100);
             });
 
@@ -74,8 +74,9 @@ namespace VideoPlayerUWP {
         private void OnSliderMoved(object sender,RangeBaseValueChangedEventArgs e) {
             long newSliderValue = (long)e.NewValue;
 
-            //Debug.WriteLine("Slider moved" + sliderValue);
+            Debug.WriteLine("Slider moved " + newSliderValue);
 
+            videoSlider.Value = newSliderValue;
             videoPlayer.SetPosition(newSliderValue * 100);
         }
 
@@ -89,11 +90,13 @@ namespace VideoPlayerUWP {
             //SetSlider();
 
 
-            //videoPlayer.ResizeSwapChainPanel(1280,720);
+            videoPlayer.ResizeSwapChainPanel(1280,720,false);
         }
 
         private void SetSlider() {
+
             long maxSliderValue = videoPlayer.GetDuration() / 100;
+            Debug.WriteLine("Max slider value: " + maxSliderValue);
 
             videoSlider.Minimum = 0;
             videoSlider.Maximum = maxSliderValue;
