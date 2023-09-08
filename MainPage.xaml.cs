@@ -140,16 +140,17 @@ namespace VideoPlayerUWP {
             try {
                 StorageFile file = await filePicker.PickSingleFileAsync();
                 if(file != null) {
-                    // Read the file as a byte stream.
-                    IBuffer buffer = await FileIO.ReadBufferAsync(file);
-                    byte[] fileBytes = buffer.ToArray();
+                    // Open the file as a stream.
+                    using(IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read)) {
+                        // Convert the stream to an IBuffer.
+                        IBuffer buffer = new Windows.Storage.Streams.Buffer((uint)stream.Size);
+                        await stream.ReadAsync(buffer,(uint)stream.Size,InputStreamOptions.None);
 
-                    videoPlayer.OpenURL(fileBytes,fileBytes.Length);
-                    SetSlider();
+                        videoPlayer.OpenURL(buffer,(int)stream.Size);
+                        SetSlider();
 
-
-
-                    controlPanel.Visibility = Visibility.Visible;
+                        controlPanel.Visibility = Visibility.Visible;
+                    }
                 }
             }
             catch(Exception ex) {

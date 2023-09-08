@@ -6,7 +6,7 @@
 #include "Audio/SoundEffect.h"
 #include "DXHelper.h"
 
-#pragma comment(lib, "mf.lib")
+#pragma comment(lib, "Mf.lib")
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
@@ -52,6 +52,8 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
  private:
   float GetFPS();
   HRESULT GetWidthAndHeight();
+  void CreateByteStreamFromByteArray(const BYTE* byteArray, DWORD arraySize,
+                                     ComPtr<IMFByteStream>& ppByteStream);
 
  protected:
   // IUnknown methods

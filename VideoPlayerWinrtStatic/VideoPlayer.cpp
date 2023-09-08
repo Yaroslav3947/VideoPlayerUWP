@@ -3,6 +3,8 @@
 
 #include <propvarutil.h>
 
+#include <mfobject.h>
+
 
 VideoPlayer::VideoPlayer(ComPtr<IDXGISwapChain1> swapChain,
                          std::function<void(long long)> positionChangedCallback,
@@ -85,7 +87,8 @@ void VideoPlayer::StartPlayback() {
                        nullptr, nullptr);
 }
 
-void CreateByteStreamFromByteArray(const BYTE *byteArray, DWORD arraySize,
+void VideoPlayer::CreateByteStreamFromByteArray(
+    const BYTE *byteArray, DWORD arraySize,
                                    ComPtr<IMFByteStream> &ppByteStream) {
   if (byteArray == nullptr || arraySize == 0) {
     return;
@@ -103,7 +106,6 @@ void CreateByteStreamFromByteArray(const BYTE *byteArray, DWORD arraySize,
 
   winrt::check_hresult(pByteStream->SetCurrentPosition(0));
 
-  // Assign the resulting IMFByteStream to ppByteStream.
   ppByteStream = pByteStream;
 }
 
@@ -111,7 +113,7 @@ void VideoPlayer::InitReader(const byte *byteArray, int size) {
   m_reader.Reset();
 
   ComPtr<IMFByteStream> byteStream;
-  CreateByteStreamFromByteArray(byteArray, size, byteStream.GetAddressOf());
+  CreateByteStreamFromByteArray(byteArray, size, byteStream);
 
 
   ComPtr<IMFAttributes> pAttributes;
