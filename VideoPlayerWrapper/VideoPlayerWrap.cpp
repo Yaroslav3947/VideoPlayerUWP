@@ -134,10 +134,16 @@ void VideoPlayerWrap::OnDeviceLost() {
   CreateSizeDependentResources();
 }
 
-void VideoPlayerWrap::OpenURL(Platform::String ^ sURL) {
-  const WCHAR* url = sURL->Data();
+void VideoPlayerWrap::OpenURL(Windows::Storage::Streams::IBuffer ^ buffer,
+                              int arraySize) {
+  Platform::Array<byte> ^ byteArray =
+      ref new Platform::Array<byte>(buffer->Length);
+  Windows::Storage::Streams::DataReader::FromBuffer(buffer)->ReadBytes(
+      byteArray);
 
-  m_videoPlayer->OpenURL(url);
+  const byte* byteArrayData = byteArray->Data;
+
+  m_videoPlayer->OpenURL(byteArrayData, arraySize);
 }
 
 void VideoPlayerWrap::PlayPauseVideo() { m_videoPlayer->PlayPauseVideo(); }

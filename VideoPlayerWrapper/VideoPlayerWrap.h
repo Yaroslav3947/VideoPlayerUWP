@@ -16,7 +16,7 @@ delegate void VideoPlayerEndOfStreamHandler(VideoPlayerWrap ^ sender);
     : public Windows::UI::Xaml::Controls::SwapChainPanel {
  public:
   VideoPlayerWrap();
-  void OpenURL(Platform::String ^ sURL);
+  void OpenURL(Windows::Storage::Streams::IBuffer ^ buffer, int arraySize);
 
   // Playback methods
   void PlayPauseVideo();

@@ -9,6 +9,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.Storage.Streams;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
@@ -139,20 +140,20 @@ namespace VideoPlayerUWP {
             try {
                 StorageFile file = await filePicker.PickSingleFileAsync();
                 if(file != null) {
-                    string selectedFilePath = file.Path;
-                    ////TODO: open file and start a videoPlayer
-                    /// Think about how to handle the case 
-                    /// when the videoPlayer is already playing a video
+                    // Read the file as a byte stream.
+                    IBuffer buffer = await FileIO.ReadBufferAsync(file);
+                    byte[] fileBytes = buffer.ToArray();
+
+                    videoPlayer.OpenURL(fileBytes,fileBytes.Length);
+                    SetSlider();
+
+
 
                     controlPanel.Visibility = Visibility.Visible;
-
-                    videoPlayer.OpenURL(selectedFilePath);
-                    SetSlider();
                 }
-
             }
             catch(Exception ex) {
-                Debug.WriteLine($"Error opening file : {ex.Message}");
+                Debug.WriteLine($"Error opening file: {ex.Message}");
             }
         }
     }

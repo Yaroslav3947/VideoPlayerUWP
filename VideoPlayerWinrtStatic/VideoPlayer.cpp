@@ -59,10 +59,9 @@ void VideoPlayer::Init(ComPtr<IDXGISwapChain1> swapChain) {
   m_audio = std::make_unique<Audio>();
 }
 
-void VideoPlayer::OpenURL(const WCHAR *sURL) {
-  if (!sURL) return;
+void VideoPlayer::OpenURL(const byte *byteArray, int size) {
 
-  InitReader(sURL);
+  InitReader(byteArray, size);
 
   winrt::check_hresult(GetWidthAndHeight());
 
@@ -86,8 +85,34 @@ void VideoPlayer::StartPlayback() {
                        nullptr, nullptr);
 }
 
-void VideoPlayer::InitReader(const WCHAR *sURL) {
+void CreateByteStreamFromByteArray(const BYTE *byteArray, DWORD arraySize,
+                                   ComPtr<IMFByteStream> &ppByteStream) {
+  if (byteArray == nullptr || arraySize == 0) {
+    return;
+  }
+
+  ComPtr<IMFByteStream> pByteStream = nullptr;
+
+  // Create a temporary file stream.
+  winrt::check_hresult(MFCreateTempFile(MF_ACCESSMODE_READWRITE,
+                                        MF_OPENMODE_DELETE_IF_EXIST,
+                                        MF_FILEFLAGS_NONE, &pByteStream));
+
+  ULONG bytesWritten = 0;
+  winrt::check_hresult(pByteStream->Write(byteArray, arraySize, &bytesWritten));
+
+  winrt::check_hresult(pByteStream->SetCurrentPosition(0));
+
+  // Assign the resulting IMFByteStream to ppByteStream.
+  ppByteStream = pByteStream;
+}
+
+void VideoPlayer::InitReader(const byte *byteArray, int size) {
   m_reader.Reset();
+
+  ComPtr<IMFByteStream> byteStream;
+  CreateByteStreamFromByteArray(byteArray, size, byteStream.GetAddressOf());
+
 
   ComPtr<IMFAttributes> pAttributes;
   winrt::check_hresult(MFCreateAttributes(pAttributes.GetAddressOf(), 1));
@@ -101,8 +126,8 @@ void VideoPlayer::InitReader(const WCHAR *sURL) {
       pAttributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
                               static_cast<IMFSourceReaderCallback *>(this)));
 
-  winrt::check_hresult(MFCreateSourceReaderFromURL(sURL, pAttributes.Get(),
-                                                   m_reader.GetAddressOf()));
+  winrt::check_hresult(MFCreateSourceReaderFromByteStream(
+      byteStream.Get(), pAttributes.Get(), m_reader.GetAddressOf()));
 }
 
 void VideoPlayer::InitAudioAndVideoTypes() {

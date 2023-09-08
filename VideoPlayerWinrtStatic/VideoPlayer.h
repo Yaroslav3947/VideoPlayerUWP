@@ -31,8 +31,8 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   void InitAudio();
   void StartPlayback();
   void InitAudioAndVideoTypes();
-  void OpenURL(const WCHAR* sURL);
-  void InitReader(const WCHAR* sURL);
+  void OpenURL(const byte* byteArray, int arraySize);
+  void InitReader(const byte* byteArray, int arraySize);
   void Init(ComPtr<IDXGISwapChain1> swapChain);
 
   // Playback
