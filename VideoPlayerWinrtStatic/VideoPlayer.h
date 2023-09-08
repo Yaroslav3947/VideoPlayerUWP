@@ -36,10 +36,13 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   void Init(ComPtr<IDXGISwapChain1> swapChain);
 
   // Playback
+  HRESULT Play();
+  HRESULT Pause();
+  void RequestNextSample();
   void PlayPauseVideo();
   LONGLONG GetDuration();
   void SetPosition(const LONGLONG& hnsPosition);
-  inline bool GetIsPaused() const { return m_isPaused; }
+  inline bool GetIsPaused() const { return m_isPlaying; }
 
   // Audio
   void Mute();
@@ -83,8 +86,9 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   HWND m_hwnd;
   long m_nRefCount;
 
-  bool m_isPaused = false;
   DWORD m_streamIndex = 0;
+  bool m_isPlaying = false;
+  bool m_sampleRequested = false;
   LONGLONG m_currentPosition = 0;
 
   float m_fps = 0.0;

@@ -3,7 +3,7 @@
 
 #include <propvarutil.h>
 
-#include <mfobject.h>
+#include <mfobjects.h>
 
 
 VideoPlayer::VideoPlayer(ComPtr<IDXGISwapChain1> swapChain,
@@ -97,9 +97,9 @@ void VideoPlayer::CreateByteStreamFromByteArray(
   ComPtr<IMFByteStream> pByteStream = nullptr;
 
   // Create a temporary file stream.
-  winrt::check_hresult(MFCreateTempFile(MF_ACCESSMODE_READWRITE,
+  /*winrt::check_hresult(MFCreateTempFile(MF_ACCESSMODE_READWRITE,
                                         MF_OPENMODE_DELETE_IF_EXIST,
-                                        MF_FILEFLAGS_NONE, &pByteStream));
+                                        MF_FILEFLAGS_NONE, &pByteStream));*/
 
   ULONG bytesWritten = 0;
   winrt::check_hresult(pByteStream->Write(byteArray, arraySize, &bytesWritten));
@@ -153,12 +153,33 @@ void VideoPlayer::InitAudioAndVideoTypes() {
 }
 
 void VideoPlayer::PlayPauseVideo() {
-  m_isPaused = !m_isPaused;
+  /*m_isPaused = !m_isPaused;
 
   if (!m_isPaused) {
     m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, nullptr, nullptr,
                          nullptr, nullptr);
+  }*/
+}
+
+void VideoPlayer::RequestNextSample() {
+  if (m_isPlaying && !m_sampleRequested) {
+    m_sampleRequested = true;
+    winrt::check_hresult(m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0,
+                                              NULL, NULL, NULL, NULL));
   }
+}
+
+HRESULT VideoPlayer::Play() {
+  if (!m_isPlaying) {
+    m_isPlaying = true;
+    RequestNextSample();  
+  }
+  return S_OK;
+}
+
+HRESULT VideoPlayer::Pause() {
+  m_isPlaying = false;
+  return S_OK;
 }
 
 LONGLONG VideoPlayer::GetDuration() {
@@ -180,7 +201,6 @@ LONGLONG VideoPlayer::GetDuration() {
 void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
   if (!m_reader) return;
 
-  PlayPauseVideo();
 
   PROPVARIANT var;
   PropVariantInit(&var);
@@ -192,7 +212,6 @@ void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
 
   PropVariantClear(&var);
 
-  PlayPauseVideo();
 }
 
 //-----------------------------------------------------------------------------
@@ -230,30 +249,29 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
                                   IMFSample *pSample) {
   std::lock_guard<std::mutex> lock(GetDxHelper()->GetResizeMtx());
 
-  if (m_isPaused) {
-    return S_OK;
-  }
-
   if (dwStreamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
-      m_endOfStreamCallback();
+    m_endOfStreamCallback();
     return S_OK;
   }
 
   m_streamIndex = dwStreamIndex;
 
-  if (dwStreamIndex == (DWORD)StreamIndex::videoStreamIndex) {
-    ComPtr<ID2D1Bitmap> bitmap;
-    bitmap =
-        m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
-    m_dxhelper->RenderBitmapOnWindow(bitmap);
+  if (m_isPlaying) {
+    if (dwStreamIndex == (DWORD)StreamIndex::videoStreamIndex) {
+      ComPtr<ID2D1Bitmap> bitmap;
+      bitmap =
+          m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
+      m_dxhelper->RenderBitmapOnWindow(bitmap);
 
-    m_positionChangedCallback(llTimestamp / 100);
+      m_positionChangedCallback(llTimestamp / 100);
 
-  } else if (dwStreamIndex == (DWORD)StreamIndex::audioStreamIndex) {
-    auto soundData = m_mediaReader->LoadMedia(pSample);
-    m_soundEffect->PlaySound(soundData);
+    } else if (dwStreamIndex == (DWORD)StreamIndex::audioStreamIndex) {
+      auto soundData = m_mediaReader->LoadMedia(pSample);
+      m_soundEffect->PlaySound(soundData);
+    }
+
+    RequestNextSample();
   }
-
   winrt::check_hresult(m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0,
                                             NULL, NULL, NULL, NULL));
 
