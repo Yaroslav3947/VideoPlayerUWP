@@ -72,9 +72,9 @@ namespace VideoPlayerUWP {
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
 
-            //videoPlayer.ResizeSwapChainPanel(1280,720,false);
-
             ////TODO: work out resizing the video player according to the window size
+            videoPlayer.ResizeSwapChainPanel(1280,720,false);
+
         }
 
         private void SetSlider() {
