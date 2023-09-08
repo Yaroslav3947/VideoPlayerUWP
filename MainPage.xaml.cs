@@ -56,7 +56,7 @@ namespace VideoPlayerUWP {
 
         private void OnVideoPlayerPositionChanged(VideoPlayerWrap sender,long newVideoPlayerPosition) {
             Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() => {
-                videoSlider.Value = newVideoPlayerPosition;
+                //videoSlider.Value = newVideoPlayerPosition;
                 UpdateDurationInfo(newVideoPlayerPosition * 100);
             });
 
@@ -66,18 +66,15 @@ namespace VideoPlayerUWP {
         private void OnSliderMoved(object sender,RangeBaseValueChangedEventArgs e) {
             long newSliderValue = (long)e.NewValue;
 
-            Debug.WriteLine("Slider moved " + newSliderValue);
-
-            videoSlider.Value = newSliderValue;
             videoPlayer.SetPosition(newSliderValue * 100);
-
-
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
 
-            videoPlayer.ResizeSwapChainPanel(1280,720,false);
+            //videoPlayer.ResizeSwapChainPanel(1280,720,false);
+
+            ////TODO: work out resizing the video player according to the window size
         }
 
         private void SetSlider() {
