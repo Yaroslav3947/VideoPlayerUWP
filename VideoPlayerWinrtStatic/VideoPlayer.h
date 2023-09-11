@@ -31,8 +31,8 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   void InitAudio();
   void StartPlayback();
   void InitAudioAndVideoTypes();
-  void OpenURL(const byte* byteArray, int arraySize);
-  void InitReader(const byte* byteArray, int arraySize);
+  void OpenURL(ComPtr<IMFByteStream> videoDataStream);
+  void InitReader(ComPtr<IMFByteStream> videoDataStream);
   void Init(ComPtr<IDXGISwapChain1> swapChain);
 
   // Playback
@@ -55,8 +55,6 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
  private:
   float GetFPS();
   HRESULT GetWidthAndHeight();
-  void CreateByteStreamFromByteArray(const BYTE* byteArray, DWORD arraySize,
-                                     ComPtr<IMFByteStream>& ppByteStream);
 
  protected:
   // IUnknown methods

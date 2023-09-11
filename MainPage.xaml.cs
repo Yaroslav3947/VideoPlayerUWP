@@ -138,19 +138,15 @@ namespace VideoPlayerUWP {
             filePicker.FileTypeFilter.Add(".mp4");
 
             try {
-                StorageFile file = await filePicker.PickSingleFileAsync();
-                if(file != null) {
-                    // Open the file as a stream.
-                    using(IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read)) {
-                        // Convert the stream to an IBuffer.
-                        IBuffer buffer = new Windows.Storage.Streams.Buffer((uint)stream.Size);
-                        await stream.ReadAsync(buffer,(uint)stream.Size,InputStreamOptions.None);
+                StorageFile pickedFile = await filePicker.PickSingleFileAsync();
 
-                        videoPlayer.OpenURL(buffer,(int)stream.Size);
-                        SetSlider();
+                if(pickedFile != null) {
+                    IRandomAccessStream videoDataStream = await pickedFile.OpenAsync(FileAccessMode.Read);
 
-                        controlPanel.Visibility = Visibility.Visible;
-                    }
+                    videoPlayer.OpenURL(videoDataStream);
+                    SetSlider();
+
+                    controlPanel.Visibility = Visibility.Visible;
                 }
             }
             catch(Exception ex) {

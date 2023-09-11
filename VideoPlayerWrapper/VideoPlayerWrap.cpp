@@ -134,16 +134,12 @@ void VideoPlayerWrap::OnDeviceLost() {
   CreateSizeDependentResources();
 }
 
-void VideoPlayerWrap::OpenURL(Windows::Storage::Streams::IBuffer ^ buffer,
-                              int arraySize) {
-  Platform::Array<byte> ^ byteArray =
-      ref new Platform::Array<byte>(buffer->Length);
-  Windows::Storage::Streams::DataReader::FromBuffer(buffer)->ReadBytes(
-      byteArray);
+void VideoPlayerWrap::OpenURL(IRandomAccessStream ^videoStreamData) {
+  ComPtr<IMFByteStream> videoByteStream;
 
-  const byte* byteArrayData = byteArray->Data;
+  winrt::check_hresult(MFCreateMFByteStreamOnStreamEx(reinterpret_cast<IUnknown*>(videoStreamData), &videoByteStream));
 
-  m_videoPlayer->OpenURL(byteArrayData, arraySize);
+  m_videoPlayer->OpenURL(videoByteStream);
 }
 
 void VideoPlayerWrap::PlayPauseVideo() { m_videoPlayer->PlayPauseVideo(); }

@@ -4,6 +4,8 @@
 
 #include "../VideoPlayerWinrtStatic/VideoPlayer.h"
 
+using namespace Windows::Storage::Streams;
+
 namespace VideoPlayerWrapper {
     ref class VideoPlayerWrap;
 public
@@ -16,7 +18,7 @@ delegate void VideoPlayerEndOfStreamHandler(VideoPlayerWrap ^ sender);
     : public Windows::UI::Xaml::Controls::SwapChainPanel {
  public:
   VideoPlayerWrap();
-  void OpenURL(Windows::Storage::Streams::IBuffer ^ buffer, int arraySize);
+  void OpenURL(IRandomAccessStream ^videoStreamData);
 
   // Playback methods
   void PlayPauseVideo();
