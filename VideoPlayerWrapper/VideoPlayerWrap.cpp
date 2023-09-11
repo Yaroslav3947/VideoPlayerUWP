@@ -142,7 +142,9 @@ void VideoPlayerWrap::OpenURL(IRandomAccessStream ^videoStreamData) {
   m_videoPlayer->OpenURL(videoByteStream);
 }
 
-void VideoPlayerWrap::PlayPauseVideo() { m_videoPlayer->PlayPauseVideo(); }
+void VideoPlayerWrapper::VideoPlayerWrap::Play() { m_videoPlayer->Play(); }
+
+void VideoPlayerWrapper::VideoPlayerWrap::Pause() { m_videoPlayer->Pause(); }
 
 void VideoPlayerWrap::SetPosition(long long position) {
   m_videoPlayer->SetPosition(position);
@@ -155,7 +157,7 @@ long long VideoPlayerWrap::GetDuration() {
 void VideoPlayerWrap::Mute() { m_videoPlayer->Mute(); }
 void VideoPlayerWrap::Unmute() { m_videoPlayer->Unmute(); }
 bool VideoPlayerWrap::GetIsMuted() { return m_videoPlayer->GetIsMuted(); }
-bool VideoPlayerWrap::GetIsPaused() { return m_videoPlayer->GetIsPaused(); }
+bool VideoPlayerWrap::GetIsPlaying() { return m_videoPlayer->GetIsPlaying(); }
 void VideoPlayerWrap::ChangeVolume(double volume) {
   m_videoPlayer->ChangeVolume(volume);
 }

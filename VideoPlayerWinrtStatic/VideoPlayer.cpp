@@ -9,8 +9,12 @@
 VideoPlayer::VideoPlayer(ComPtr<IDXGISwapChain1> swapChain,
                          std::function<void(long long)> positionChangedCallback,
                          std::function<void()> endOfStreamCallback)
-    : m_nRefCount(1),
+    : m_fps(0.0),
+      m_width(0),
+      m_height(0),
+      m_nRefCount(1),
       m_reader(nullptr),
+      m_isPlaying(false),
       m_mediaReader(nullptr),
       m_soundEffect(nullptr),
       m_positionChangedCallback(positionChangedCallback),
@@ -72,8 +76,6 @@ void VideoPlayer::OpenURL(ComPtr<IMFByteStream> videoDataStream) {
   InitAudio();
   StartPlayback();
 
-  m_isPlaying = true;
-
   return;
 }
 
@@ -87,6 +89,8 @@ void VideoPlayer::InitAudio() {
 void VideoPlayer::StartPlayback() {
   m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, nullptr, nullptr,
                        nullptr, nullptr);
+
+    m_isPlaying = true;
 }
 
 void VideoPlayer::InitReader(ComPtr<IMFByteStream> videoDataStream) {
@@ -128,21 +132,10 @@ void VideoPlayer::InitAudioAndVideoTypes() {
       (DWORD)StreamIndex::videoStreamIndex, nullptr, pVideoType.Get()));
 }
 
-void VideoPlayer::PlayPauseVideo() {
-  /*m_isPaused = !m_isPaused;
-
-  if (!m_isPaused) {
-    m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, nullptr, nullptr,
-                         nullptr, nullptr);
-  }*/
-}
 
 void VideoPlayer::RequestNextSample() {
-  if (m_isPlaying && !m_sampleRequested) {
-    m_sampleRequested = true;
-    winrt::check_hresult(m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0,
-                                              NULL, NULL, NULL, NULL));
-  }
+  winrt::check_hresult(m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0,
+                                            NULL, NULL, NULL, NULL));
 }
 
 HRESULT VideoPlayer::Play() {
@@ -167,7 +160,6 @@ LONGLONG VideoPlayer::GetDuration() {
   HRESULT hr = m_reader->GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
                                                   MF_PD_DURATION, &var);
   if (SUCCEEDED(hr)) {
-    //hr = PropVariantToInt(var, &duration);
     duration = var.hVal.QuadPart;
     PropVariantClear(&var);
   }
@@ -227,10 +219,9 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
 
   if (dwStreamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
     m_endOfStreamCallback();
+    m_isPlaying = false;
     return S_OK;
   }
-
-  m_streamIndex = dwStreamIndex;
 
   if (m_isPlaying) {
     if (dwStreamIndex == (DWORD)StreamIndex::videoStreamIndex) {
@@ -248,8 +239,6 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
 
     RequestNextSample();
   }
-  winrt::check_hresult(m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0,
-                                            NULL, NULL, NULL, NULL));
 
   return S_OK;
 }

@@ -51,7 +51,7 @@ namespace VideoPlayerUWP {
         private void OnVideoPlayerEndOfStream(VideoPlayerWrap sender) {
             // TODO: change the icon to play
             videoPlayer.SetPosition(0);
-            videoPlayer.PlayPauseVideo();
+            videoPlayer.Pause();
             //videoSlider.Value = 0;
         }
 
@@ -92,7 +92,7 @@ namespace VideoPlayerUWP {
             double newVideoGridHeight = videoGrid.ActualHeight;
 
             if(newVideoGridHeight > 0 && newVideoGridWidth > 0) {
-                if(!videoPlayer.GetIsPaused()) {
+                if(videoPlayer.GetIsPlaying()) {
                     videoPlayer?.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight,false);
                 } else {
                     videoPlayer?.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight,true);
@@ -101,7 +101,11 @@ namespace VideoPlayerUWP {
         }
 
         private void PlayPauseButton_Click(object sender,RoutedEventArgs e) {
-            videoPlayer.PlayPauseVideo();
+            if(videoPlayer.GetIsPlaying()) {
+                videoPlayer.Pause();
+            } else {
+                videoPlayer.Play();
+            }
             ////TODO: change the icon
         }
 

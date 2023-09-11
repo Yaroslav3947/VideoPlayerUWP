@@ -38,11 +38,10 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   // Playback
   HRESULT Play();
   HRESULT Pause();
-  void RequestNextSample();
-  void PlayPauseVideo();
   LONGLONG GetDuration();
+  void RequestNextSample();
   void SetPosition(const LONGLONG& hnsPosition);
-  inline bool GetIsPaused() const { return m_isPlaying; }
+  inline bool GetIsPlaying() const { return m_isPlaying; }
 
   // Audio
   void Mute();
@@ -84,17 +83,14 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   HWND m_hwnd;
   long m_nRefCount;
 
-  DWORD m_streamIndex = 0;
-  bool m_isPlaying = false;
-  bool m_sampleRequested = false;
-  LONGLONG m_currentPosition = 0;
+  bool m_isPlaying;
 
-  float m_fps = 0.0;
-  UINT32 m_width = 0;
-  UINT32 m_height = 0;
+  float m_fps;
+  UINT32 m_width;
+  UINT32 m_height;
 
-  std::function<void(long long)> m_positionChangedCallback;
   std::function<void()> m_endOfStreamCallback;
+  std::function<void(long long)> m_positionChangedCallback;
 
   enum class StreamIndex { audioStreamIndex = 0, videoStreamIndex = 1 };
 };

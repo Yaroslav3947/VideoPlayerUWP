@@ -21,7 +21,8 @@ delegate void VideoPlayerEndOfStreamHandler(VideoPlayerWrap ^ sender);
   void OpenURL(IRandomAccessStream ^videoStreamData);
 
   // Playback methods
-  void PlayPauseVideo();
+  void Play();
+  void Pause();
   long long GetDuration();
   void SetPosition(long long position);
 
@@ -29,7 +30,7 @@ delegate void VideoPlayerEndOfStreamHandler(VideoPlayerWrap ^ sender);
   void Mute();
   void Unmute();
   bool GetIsMuted();
-  bool GetIsPaused();
+  bool GetIsPlaying();
   void ChangeVolume(double volume);
 
   // SwapChainPanel event handlers
