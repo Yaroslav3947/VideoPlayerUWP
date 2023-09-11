@@ -28,6 +28,7 @@ namespace VideoPlayerUWP {
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class MainPage : Page {
+        private bool isSliderBeingManipulated = false;
         public MainPage() {
             this.InitializeComponent();
             ConnectSignals();
@@ -52,36 +53,38 @@ namespace VideoPlayerUWP {
             // TODO: change the icon to play
             videoPlayer.SetPosition(0);
             videoPlayer.Pause();
-            //videoSlider.Value = 0;
         }
 
         private void OnVideoPlayerPositionChanged(VideoPlayerWrap sender,long newVideoPlayerPosition) {
-            //Debug.WriteLine("Emitted");
             Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() => {
-                videoSlider.Value = newVideoPlayerPosition;
-                UpdateDurationInfo(newVideoPlayerPosition * 100);
+                if(!isSliderBeingManipulated) {
+                    videoSlider.Value = newVideoPlayerPosition;
+                    UpdateDurationInfo(newVideoPlayerPosition);
+                }
             });
 
             ////TODO: work out updating the slider
-
         }
         private void OnSliderMoved(object sender,RangeBaseValueChangedEventArgs e) {
+            isSliderBeingManipulated = true;
             long newSliderValue = (long)e.NewValue;
 
-            //videoPlayer.SetPosition(newSliderValue * 100);
-        }
+            if(videoPlayer.GetIsPlaying()) {
+                videoPlayer.Pause();
+                videoPlayer.SetPosition(newSliderValue);
+                videoPlayer.Play();
+            } else {
+                videoPlayer.SetPosition(newSliderValue);
+                videoPlayer.Play();
+            }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e) {
-            base.OnNavigatedTo(e);
-
-            ////TODO: work out resizing the video player according to the window size
-            videoPlayer.ResizeSwapChainPanel(1280,720,false);
+            isSliderBeingManipulated = false;
 
         }
 
         private void SetSlider() {
 
-            long maxSliderValue = videoPlayer.GetDuration() / 100;
+            long maxSliderValue = videoPlayer.GetDuration();
             Debug.WriteLine("Max slider value: " + maxSliderValue);
 
             videoSlider.Minimum = 0;
@@ -152,6 +155,13 @@ namespace VideoPlayerUWP {
                     SetSlider();
 
                     controlPanel.Visibility = Visibility.Visible;
+
+                    double newVideoGridWidth = videoGrid.ActualWidth;
+                    double newVideoGridHeight = videoGrid.ActualHeight;
+
+                    videoPlayer.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight,false);
+
+
                 }
             }
             catch(Exception ex) {

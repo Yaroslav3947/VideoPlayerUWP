@@ -170,14 +170,13 @@ LONGLONG VideoPlayer::GetDuration() {
 void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
   if (!m_reader) return;
 
-
   PROPVARIANT var;
   PropVariantInit(&var);
   var.vt = VT_I8;
   var.hVal.QuadPart = hnsNewPosition;
 
-  // winrt::check_hresult(m_reader->SetCurrentPosition(GUID_NULL, var));
-  m_reader->SetCurrentPosition(GUID_NULL, var);
+   //winrt::check_hresult(m_reader->SetCurrentPosition(GUID_NULL, var));
+  HRESULT hr = m_reader->SetCurrentPosition(GUID_NULL, var);
 
   PropVariantClear(&var);
 
@@ -234,7 +233,7 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
       static int sampleCounter = 0;
 
       if (sampleCounter++ % GetFPS() == 0) {
-        m_positionChangedCallback(llTimestamp / 100);
+        m_positionChangedCallback(llTimestamp);
       }
     } else if (dwStreamIndex == (DWORD)StreamIndex::audioStreamIndex) {
       auto soundData = m_mediaReader->LoadMedia(pSample);
