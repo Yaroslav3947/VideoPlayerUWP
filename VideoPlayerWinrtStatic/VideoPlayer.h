@@ -48,11 +48,10 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   void Unmute();
   bool GetIsMuted() const;
   void ChangeVolume(const float& volume);
-
   DXHelper* GetDxHelper() const { return m_dxhelper.get(); }
 
  private:
-  float GetFPS();
+  int GetFPS();
   HRESULT GetWidthAndHeight();
 
  protected:

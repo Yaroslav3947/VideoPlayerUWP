@@ -69,6 +69,7 @@ void VideoPlayer::OpenURL(ComPtr<IMFByteStream> videoDataStream) {
 
   InitReader(videoDataStream);
 
+  m_fps = GetFPS();
   winrt::check_hresult(GetWidthAndHeight());
 
   InitAudioAndVideoTypes();
@@ -196,7 +197,7 @@ HRESULT VideoPlayer::GetWidthAndHeight() {
   return hr;
 }
 
-float VideoPlayer::GetFPS() {
+int VideoPlayer::GetFPS() {
   ComPtr<IMFMediaType> pMediaType = nullptr;
   HRESULT hr = m_reader->GetCurrentMediaType(1, &pMediaType);
   if (SUCCEEDED(hr)) {
@@ -209,7 +210,7 @@ float VideoPlayer::GetFPS() {
     }
   }
 
-  return 0.0f;
+  return 0;
 }
 
 HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
@@ -230,8 +231,11 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
           m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
       m_dxhelper->RenderBitmapOnWindow(bitmap);
 
-      m_positionChangedCallback(llTimestamp / 100);
+      static int sampleCounter = 0;
 
+      if (sampleCounter++ % GetFPS() == 0) {
+        m_positionChangedCallback(llTimestamp / 100);
+      }
     } else if (dwStreamIndex == (DWORD)StreamIndex::audioStreamIndex) {
       auto soundData = m_mediaReader->LoadMedia(pSample);
       m_soundEffect->PlaySound(soundData);
