@@ -4,6 +4,8 @@
 
 #include "../VideoPlayerWinrtStatic/VideoPlayer.h"
 
+using namespace Windows::Storage::Streams;
+
 namespace VideoPlayerWrapper {
     ref class VideoPlayerWrap;
 public
@@ -16,10 +18,11 @@ delegate void VideoPlayerEndOfStreamHandler(VideoPlayerWrap ^ sender);
     : public Windows::UI::Xaml::Controls::SwapChainPanel {
  public:
   VideoPlayerWrap();
-  void OpenURL(Platform::String ^ sURL);
+  void OpenURL(IRandomAccessStream ^videoStreamData);
 
   // Playback methods
-  void PlayPauseVideo();
+  void Play();
+  void Pause();
   long long GetDuration();
   void SetPosition(long long position);
 
@@ -27,7 +30,7 @@ delegate void VideoPlayerEndOfStreamHandler(VideoPlayerWrap ^ sender);
   void Mute();
   void Unmute();
   bool GetIsMuted();
-  bool GetIsPaused();
+  bool GetIsPlaying();
   void ChangeVolume(double volume);
 
   // SwapChainPanel event handlers

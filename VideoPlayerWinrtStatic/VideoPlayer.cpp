@@ -3,12 +3,18 @@
 
 #include <propvarutil.h>
 
+#include <mfobjects.h>
+
 
 VideoPlayer::VideoPlayer(ComPtr<IDXGISwapChain1> swapChain,
                          std::function<void(long long)> positionChangedCallback,
                          std::function<void()> endOfStreamCallback)
-    : m_nRefCount(1),
+    : m_fps(0.0),
+      m_width(0),
+      m_height(0),
+      m_nRefCount(1),
       m_reader(nullptr),
+      m_isPlaying(false),
       m_mediaReader(nullptr),
       m_soundEffect(nullptr),
       m_positionChangedCallback(positionChangedCallback),
@@ -59,11 +65,11 @@ void VideoPlayer::Init(ComPtr<IDXGISwapChain1> swapChain) {
   m_audio = std::make_unique<Audio>();
 }
 
-void VideoPlayer::OpenURL(const WCHAR *sURL) {
-  if (!sURL) return;
+void VideoPlayer::OpenURL(ComPtr<IMFByteStream> videoDataStream) {
 
-  InitReader(sURL);
+  InitReader(videoDataStream);
 
+  m_fps = GetFPS();
   winrt::check_hresult(GetWidthAndHeight());
 
   InitAudioAndVideoTypes();
@@ -84,9 +90,11 @@ void VideoPlayer::InitAudio() {
 void VideoPlayer::StartPlayback() {
   m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, nullptr, nullptr,
                        nullptr, nullptr);
+
+    m_isPlaying = true;
 }
 
-void VideoPlayer::InitReader(const WCHAR *sURL) {
+void VideoPlayer::InitReader(ComPtr<IMFByteStream> videoDataStream) {
   m_reader.Reset();
 
   ComPtr<IMFAttributes> pAttributes;
@@ -101,8 +109,8 @@ void VideoPlayer::InitReader(const WCHAR *sURL) {
       pAttributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
                               static_cast<IMFSourceReaderCallback *>(this)));
 
-  winrt::check_hresult(MFCreateSourceReaderFromURL(sURL, pAttributes.Get(),
-                                                   m_reader.GetAddressOf()));
+  winrt::check_hresult(MFCreateSourceReaderFromByteStream(
+      videoDataStream.Get(), pAttributes.Get(), m_reader.GetAddressOf()));
 }
 
 void VideoPlayer::InitAudioAndVideoTypes() {
@@ -125,13 +133,23 @@ void VideoPlayer::InitAudioAndVideoTypes() {
       (DWORD)StreamIndex::videoStreamIndex, nullptr, pVideoType.Get()));
 }
 
-void VideoPlayer::PlayPauseVideo() {
-  m_isPaused = !m_isPaused;
 
-  if (!m_isPaused) {
-    m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, nullptr, nullptr,
-                         nullptr, nullptr);
+void VideoPlayer::RequestNextSample() {
+  winrt::check_hresult(m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0,
+                                            NULL, NULL, NULL, NULL));
+}
+
+HRESULT VideoPlayer::Play() {
+  if (!m_isPlaying) {
+    m_isPlaying = true;
+    RequestNextSample();  
   }
+  return S_OK;
+}
+
+HRESULT VideoPlayer::Pause() {
+  m_isPlaying = false;
+  return S_OK;
 }
 
 LONGLONG VideoPlayer::GetDuration() {
@@ -143,7 +161,6 @@ LONGLONG VideoPlayer::GetDuration() {
   HRESULT hr = m_reader->GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
                                                   MF_PD_DURATION, &var);
   if (SUCCEEDED(hr)) {
-    //hr = PropVariantToInt(var, &duration);
     duration = var.hVal.QuadPart;
     PropVariantClear(&var);
   }
@@ -153,19 +170,16 @@ LONGLONG VideoPlayer::GetDuration() {
 void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
   if (!m_reader) return;
 
-  PlayPauseVideo();
-
   PROPVARIANT var;
   PropVariantInit(&var);
   var.vt = VT_I8;
   var.hVal.QuadPart = hnsNewPosition;
 
-  // winrt::check_hresult(m_reader->SetCurrentPosition(GUID_NULL, var));
-  m_reader->SetCurrentPosition(GUID_NULL, var);
+   //winrt::check_hresult(m_reader->SetCurrentPosition(GUID_NULL, var));
+  HRESULT hr = m_reader->SetCurrentPosition(GUID_NULL, var);
 
   PropVariantClear(&var);
 
-  PlayPauseVideo();
 }
 
 //-----------------------------------------------------------------------------
@@ -182,7 +196,7 @@ HRESULT VideoPlayer::GetWidthAndHeight() {
   return hr;
 }
 
-float VideoPlayer::GetFPS() {
+int VideoPlayer::GetFPS() {
   ComPtr<IMFMediaType> pMediaType = nullptr;
   HRESULT hr = m_reader->GetCurrentMediaType(1, &pMediaType);
   if (SUCCEEDED(hr)) {
@@ -195,7 +209,7 @@ float VideoPlayer::GetFPS() {
     }
   }
 
-  return 0.0f;
+  return 0;
 }
 
 HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
@@ -203,32 +217,31 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
                                   IMFSample *pSample) {
   std::lock_guard<std::mutex> lock(GetDxHelper()->GetResizeMtx());
 
-  if (m_isPaused) {
-    return S_OK;
-  }
-
   if (dwStreamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
-      m_endOfStreamCallback();
+    m_endOfStreamCallback();
+    m_isPlaying = false;
     return S_OK;
   }
 
-  m_streamIndex = dwStreamIndex;
+  if (m_isPlaying) {
+    if (dwStreamIndex == (DWORD)StreamIndex::videoStreamIndex) {
+      ComPtr<ID2D1Bitmap> bitmap;
+      bitmap =
+          m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
+      m_dxhelper->RenderBitmapOnWindow(bitmap);
 
-  if (dwStreamIndex == (DWORD)StreamIndex::videoStreamIndex) {
-    ComPtr<ID2D1Bitmap> bitmap;
-    bitmap =
-        m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
-    m_dxhelper->RenderBitmapOnWindow(bitmap);
+      static int sampleCounter = 0;
 
-    m_positionChangedCallback(llTimestamp / 100);
+      if (sampleCounter++ % GetFPS() == 0) {
+        m_positionChangedCallback(llTimestamp);
+      }
+    } else if (dwStreamIndex == (DWORD)StreamIndex::audioStreamIndex) {
+      auto soundData = m_mediaReader->LoadMedia(pSample);
+      m_soundEffect->PlaySound(soundData);
+    }
 
-  } else if (dwStreamIndex == (DWORD)StreamIndex::audioStreamIndex) {
-    auto soundData = m_mediaReader->LoadMedia(pSample);
-    m_soundEffect->PlaySound(soundData);
+    RequestNextSample();
   }
-
-  winrt::check_hresult(m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0,
-                                            NULL, NULL, NULL, NULL));
 
   return S_OK;
 }

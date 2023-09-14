@@ -6,7 +6,7 @@
 #include "Audio/SoundEffect.h"
 #include "DXHelper.h"
 
-#pragma comment(lib, "mf.lib")
+#pragma comment(lib, "Mf.lib")
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
@@ -31,26 +31,27 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   void InitAudio();
   void StartPlayback();
   void InitAudioAndVideoTypes();
-  void OpenURL(const WCHAR* sURL);
-  void InitReader(const WCHAR* sURL);
+  void OpenURL(ComPtr<IMFByteStream> videoDataStream);
+  void InitReader(ComPtr<IMFByteStream> videoDataStream);
   void Init(ComPtr<IDXGISwapChain1> swapChain);
 
   // Playback
-  void PlayPauseVideo();
+  HRESULT Play();
+  HRESULT Pause();
   LONGLONG GetDuration();
+  void RequestNextSample();
   void SetPosition(const LONGLONG& hnsPosition);
-  inline bool GetIsPaused() const { return m_isPaused; }
+  inline bool GetIsPlaying() const { return m_isPlaying; }
 
   // Audio
   void Mute();
   void Unmute();
   bool GetIsMuted() const;
   void ChangeVolume(const float& volume);
-
   DXHelper* GetDxHelper() const { return m_dxhelper.get(); }
 
  private:
-  float GetFPS();
+  int GetFPS();
   HRESULT GetWidthAndHeight();
 
  protected:
@@ -81,16 +82,14 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   HWND m_hwnd;
   long m_nRefCount;
 
-  bool m_isPaused = false;
-  DWORD m_streamIndex = 0;
-  LONGLONG m_currentPosition = 0;
+  bool m_isPlaying;
 
-  float m_fps = 0.0;
-  UINT32 m_width = 0;
-  UINT32 m_height = 0;
+  float m_fps;
+  UINT32 m_width;
+  UINT32 m_height;
 
-  std::function<void(long long)> m_positionChangedCallback;
   std::function<void()> m_endOfStreamCallback;
+  std::function<void(long long)> m_positionChangedCallback;
 
   enum class StreamIndex { audioStreamIndex = 0, videoStreamIndex = 1 };
 };

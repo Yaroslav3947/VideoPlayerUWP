@@ -9,6 +9,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.Storage.Streams;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
@@ -27,6 +28,7 @@ namespace VideoPlayerUWP {
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class MainPage : Page {
+        private bool isSliderBeingManipulated = false;
         public MainPage() {
             this.InitializeComponent();
             ConnectSignals();
@@ -50,36 +52,39 @@ namespace VideoPlayerUWP {
         private void OnVideoPlayerEndOfStream(VideoPlayerWrap sender) {
             // TODO: change the icon to play
             videoPlayer.SetPosition(0);
-            videoPlayer.PlayPauseVideo();
-            //videoSlider.Value = 0;
+            videoPlayer.Pause();
         }
 
         private void OnVideoPlayerPositionChanged(VideoPlayerWrap sender,long newVideoPlayerPosition) {
             Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() => {
-                //videoSlider.Value = newVideoPlayerPosition;
-                UpdateDurationInfo(newVideoPlayerPosition * 100);
+                if(!isSliderBeingManipulated) {
+                    videoSlider.Value = newVideoPlayerPosition;
+                    UpdateDurationInfo(newVideoPlayerPosition);
+                }
             });
 
             ////TODO: work out updating the slider
-
         }
         private void OnSliderMoved(object sender,RangeBaseValueChangedEventArgs e) {
+            isSliderBeingManipulated = true;
             long newSliderValue = (long)e.NewValue;
 
-            videoPlayer.SetPosition(newSliderValue * 100);
-        }
+            if(videoPlayer.GetIsPlaying()) {
+                videoPlayer.Pause();
+                videoPlayer.SetPosition(newSliderValue);
+                videoPlayer.Play();
+            } else {
+                videoPlayer.SetPosition(newSliderValue);
+                videoPlayer.Play();
+            }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e) {
-            base.OnNavigatedTo(e);
-
-            ////TODO: work out resizing the video player according to the window size
-            videoPlayer.ResizeSwapChainPanel(1280,720,false);
+            isSliderBeingManipulated = false;
 
         }
 
         private void SetSlider() {
 
-            long maxSliderValue = videoPlayer.GetDuration() / 100;
+            long maxSliderValue = videoPlayer.GetDuration();
             Debug.WriteLine("Max slider value: " + maxSliderValue);
 
             videoSlider.Minimum = 0;
@@ -91,7 +96,7 @@ namespace VideoPlayerUWP {
             double newVideoGridHeight = videoGrid.ActualHeight;
 
             if(newVideoGridHeight > 0 && newVideoGridWidth > 0) {
-                if(!videoPlayer.GetIsPaused()) {
+                if(videoPlayer.GetIsPlaying()) {
                     videoPlayer?.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight,false);
                 } else {
                     videoPlayer?.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight,true);
@@ -100,7 +105,11 @@ namespace VideoPlayerUWP {
         }
 
         private void PlayPauseButton_Click(object sender,RoutedEventArgs e) {
-            videoPlayer.PlayPauseVideo();
+            if(videoPlayer.GetIsPlaying()) {
+                videoPlayer.Pause();
+            } else {
+                videoPlayer.Play();
+            }
             ////TODO: change the icon
         }
 
@@ -137,22 +146,26 @@ namespace VideoPlayerUWP {
             filePicker.FileTypeFilter.Add(".mp4");
 
             try {
-                StorageFile file = await filePicker.PickSingleFileAsync();
-                if(file != null) {
-                    string selectedFilePath = file.Path;
-                    ////TODO: open file and start a videoPlayer
-                    /// Think about how to handle the case 
-                    /// when the videoPlayer is already playing a video
+                StorageFile pickedFile = await filePicker.PickSingleFileAsync();
+
+                if(pickedFile != null) {
+                    IRandomAccessStream videoDataStream = await pickedFile.OpenAsync(FileAccessMode.Read);
+
+                    videoPlayer.OpenURL(videoDataStream);
+                    SetSlider();
 
                     controlPanel.Visibility = Visibility.Visible;
 
-                    videoPlayer.OpenURL(selectedFilePath);
-                    SetSlider();
-                }
+                    double newVideoGridWidth = videoGrid.ActualWidth;
+                    double newVideoGridHeight = videoGrid.ActualHeight;
 
+                    videoPlayer.ResizeSwapChainPanel((int)newVideoGridWidth,(int)newVideoGridHeight,false);
+
+
+                }
             }
             catch(Exception ex) {
-                Debug.WriteLine($"Error opening file : {ex.Message}");
+                Debug.WriteLine($"Error opening file: {ex.Message}");
             }
         }
     }
