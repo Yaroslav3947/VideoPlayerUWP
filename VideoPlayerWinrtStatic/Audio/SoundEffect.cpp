@@ -6,7 +6,8 @@ SoundEffect::SoundEffect()
     : m_audioAvailable(false),
       m_volume{1.0},
       m_isPlaying{false},
-      m_sourceFormat{nullptr} {}
+      m_sourceFormat{nullptr},
+      voiceCallback(m_audioPlaybackMutex){}
 
 void SoundEffect::Initialize(ComPtr<IXAudio2> masteringEngine,
                              WAVEFORMATEX* sourceFormat) {
@@ -16,8 +17,10 @@ void SoundEffect::Initialize(ComPtr<IXAudio2> masteringEngine,
     return;
   }
 
-  winrt::check_hresult(
-      masteringEngine->CreateSourceVoice(&m_sourceVoice, m_sourceFormat));
+  winrt::check_hresult(masteringEngine->CreateSourceVoice(
+      &m_sourceVoice, m_sourceFormat, 0, XAUDIO2_DEFAULT_FREQ_RATIO,
+      &voiceCallback, NULL, NULL));
+
   m_audioAvailable = true;
 }
 
@@ -41,6 +44,7 @@ void SoundEffect::PlaySound(std::vector<byte> const& soundData) {
   winrt::check_hresult(m_sourceVoice->SubmitSourceBuffer(&buffer));
 
   winrt::check_hresult(m_sourceVoice->Start());
+  WaitForSingleObjectEx(voiceCallback.hBufferEndEvent, 0, TRUE);
 }
 
 void SoundEffect::ChangeVolume(const float& volume) {

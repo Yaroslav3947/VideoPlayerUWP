@@ -79,6 +79,9 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   std::unique_ptr<MediaReader> m_mediaReader;
   std::unique_ptr<SoundEffect> m_soundEffect;
 
+  std::mutex m_audioPlaybackMutex;
+
+
   HWND m_hwnd;
   long m_nRefCount;
 

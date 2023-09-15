@@ -13,6 +13,7 @@
     <ClCompile Include="Audio\Audio.cpp" />
     <ClCompile Include="Audio\MediaReader.cpp" />
     <ClCompile Include="Audio\SoundEffect.cpp" />
+    <ClCompile Include="Audio\MyAudioCallback.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -22,5 +23,6 @@
     <ClInclude Include="Audio\Audio.h" />
     <ClInclude Include="Audio\MediaReader.h" />
     <ClInclude Include="Audio\SoundEffect.h" />
+    <ClInclude Include="Audio\MyAudioCallback.h" />
   </ItemGroup>
 </Project>

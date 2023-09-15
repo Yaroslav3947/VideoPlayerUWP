@@ -237,7 +237,10 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex,
       }
     } else if (dwStreamIndex == (DWORD)StreamIndex::audioStreamIndex) {
       auto soundData = m_mediaReader->LoadMedia(pSample);
-      m_soundEffect->PlaySound(soundData);
+      {
+        std::lock_guard<std::mutex> lock(m_soundEffect->GetAudioPlaybackMutex());
+        m_soundEffect->PlaySound(soundData);
+      }
     }
 
     RequestNextSample();

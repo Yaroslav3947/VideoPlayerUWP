@@ -191,6 +191,7 @@
   <ItemGroup>
     <ClInclude Include="Audio\Audio.h" />
     <ClInclude Include="Audio\MediaReader.h" />
+    <ClInclude Include="Audio\MyAudioCallback.h" />
     <ClInclude Include="Audio\SoundEffect.h" />
     <ClInclude Include="DXHelper.h" />
     <ClInclude Include="VideoPlayer.h" />
@@ -200,6 +201,7 @@
   <ItemGroup>
     <ClCompile Include="Audio\Audio.cpp" />
     <ClCompile Include="Audio\MediaReader.cpp" />
+    <ClCompile Include="Audio\MyAudioCallback.cpp" />
     <ClCompile Include="Audio\SoundEffect.cpp" />
     <ClCompile Include="DXHelper.cpp" />
     <ClCompile Include="VideoPlayer.cpp" />
